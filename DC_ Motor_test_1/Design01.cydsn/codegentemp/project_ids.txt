@@ -1,0 +1,6 @@
+C:\Users\ywlim\Downloads\3\DC_ Motor_test_1 - Pcontroller\DC_ Motor_test_1 - Pcontroller\Design01.cydsn\Design01.cyprj|433c604c-d9b5-4319-9a3e-f973419df73a
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|91023171-e3b8-4917-961c-f335e6539d94
+C:\Users\ywlim\Documents\PSoC Creator\4.4\Downloads ( 4.4).cylib\Downloads ( 4.4).cyprj|021c095f-597e-411b-96ce-ca26d73341f8
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|296e7fdf-e2ad-40a7-9ee8-4bfcf0d8a6cc
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|febd8c07-1061-45b7-b06f-c3974dfc5606
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|52dd49f2-5767-4143-bcdf-87def8fad9c9
