@@ -49,6 +49,20 @@
 <v>DC_ Motor_test_1\Design01\Design01.cydwr\Directives</v>
 <v>DC_ Motor_test_1\Design01\Design01.cydwr\Flash Security</v>
 <v>DC_ Motor_test_1\Design01\Design01.cydwr\EEPROM</v>
+<v>DC_ Motor_test_1\Design01\Header Files</v>
+<v>DC_ Motor_test_1\Design01\Header Files\cyapicallbacks.h</v>
+<v>DC_ Motor_test_1\Design01\Source Files</v>
+<v>DC_ Motor_test_1\Design01\Source Files\main.c</v>
+<v>DC_ Motor_test_1\Design01\Generated_Source</v>
+<v>DC_ Motor_test_1\Design01\Generated_Source\PSoC5</v>
+<v>DC_ Motor_test_1\Design01\Generated_Source\PSoC5\Clock_1</v>
+<v>DC_ Motor_test_1\Design01\Generated_Source\PSoC5\Clock_2</v>
+<v>DC_ Motor_test_1\Design01\Generated_Source\PSoC5\cy_boot</v>
+<v>DC_ Motor_test_1\Design01\Generated_Source\PSoC5\Em_EEPROM_Dynamic</v>
+<v>DC_ Motor_test_1\Design01\Generated_Source\PSoC5\isr_1</v>
+<v>DC_ Motor_test_1\Design01\Generated_Source\PSoC5\isr_2</v>
+<v>DC_ Motor_test_1\Design01\Generated_Source\PSoC5\Motor_1_ENA</v>
+<v>DC_ Motor_test_1\Design01\Generated_Source\PSoC5\Motor_1_IN_1</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 <CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
@@ -142,6 +156,20 @@
 <v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\CyBootAsmGnu.lst</v>
 <v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\CyDmac.lst</v>
 <v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\cyfitter_cfg.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\CyFlash.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\CyLib.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\cymetadata.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\cyPm.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\CySpc.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\cyutils.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_1.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_2.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\main.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\Motor_1_ENA.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\Motor_1_IN_1.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\Motor_1_IN_2.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\Motor_1_Phase_A.lst</v>
+<v>DC_ Motor_test_1\Design01\CortexM3\ARM_GCC_541\Debug\Listing Files\Motor_1_Phase_B.lst</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStates>
@@ -186,6 +214,13 @@
 <v>DC_ Motor_test_1\Design01\cy_isr_v1_70</v>
 <v>DC_ Motor_test_1\Design01\cy_isr_v1_70\cy_isr_v1_70.pdf</v>
 <v>DC_ Motor_test_1\Design01\cy_pins_v2_20</v>
+<v>DC_ Motor_test_1\Design01\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>DC_ Motor_test_1\Design01\PWM_v3_30</v>
+<v>DC_ Motor_test_1\Design01\PWM_v3_30\PWM_v3_30.pdf</v>
+<v>DC_ Motor_test_1\Design01\QuadDec_v3_0</v>
+<v>DC_ Motor_test_1\Design01\QuadDec_v3_0\QuadDec_v3_0.pdf</v>
+<v>DC_ Motor_test_1\Design01\UART_v2_50</v>
+<v>DC_ Motor_test_1\Design01\UART_v2_50\UART_v2_50.pdf</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStatesV2>

@@ -1,3 +1,3 @@
-# Component constraints for C:\Users\ywlim\Downloads\3\DC_ Motor_test_1 - Pcontroller\DC_ Motor_test_1 - Pcontroller\Design01.cydsn\TopDesign\TopDesign.cysch
-# Project: C:\Users\ywlim\Downloads\3\DC_ Motor_test_1 - Pcontroller\DC_ Motor_test_1 - Pcontroller\Design01.cydsn\Design01.cyprj
-# Date: Wed, 09 Sep 2026 06:51:43 GMT
+# Component constraints for D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\TopDesign\TopDesign.cysch
+# Project: D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\Design01.cyprj
+# Date: Tue, 15 Sep 2026 10:19:27 GMT
