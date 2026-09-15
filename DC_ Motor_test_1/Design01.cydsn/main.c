@@ -16,6 +16,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include <ctype.h>
+// lol thisis a test
 
 char Rx = '\0';
 char string_1[200]; //debug
