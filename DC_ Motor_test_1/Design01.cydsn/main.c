@@ -26,6 +26,23 @@ char rx_buffer[100];
 uint8 rx_index = 0;
 int cmd_code = 0;
 
+/* Trial interval: mechanical settling plus five camera frames. Tune on hardware.
+ * This is not a camera acknowledgement; slow frames may require a longer wait.
+ */
+#define CAMERA_SETTLE_MS 600u
+#define MOTOR_CONTROL_PERIOD_MS 100u
+enum { CAMERA_SETTLING, CAMERA_WAIT_RESULT, CAMERA_READY, CAMERA_MOVING };
+static volatile uint8 camera_state = CAMERA_SETTLING;
+static volatile uint32 camera_ms = 0u;
+static uint32 camera_stop_ms = 0u;
+static int movement_steps_done = 0;
+static void begin_camera_scan(void);
+
+static void camera_tick(void)
+{
+    camera_ms++;
+}
+
 #define PULSES_PER_GRID  1900
 #define PULSES_PER_DIAGONAL  2700
 #define PULSES_PER_45DEGREE  1300
@@ -460,7 +477,23 @@ int while_condition_true(void)
  */
 void advance_command_index(int heading_delta_deg)
 {
-    stop_motors();
+    begin_camera_scan();
+
+    /* Keep the original command intact so REPEAT/WHILE can execute it again.
+     * Each completed f/b segment is one grid, including diagonal headings.
+     */
+    TurtleCommand *finished = executing_while
+        ? &while_cmd_queue[while_cmd_idx] : &cmd_queue[current_cmd_idx];
+    if (finished->type == 'f' || finished->type == 'b')
+    {
+        movement_steps_done++;
+        if (movement_steps_done < abs(finished->param))
+        {
+            request_reset_start = 1;
+            return;
+        }
+    }
+    movement_steps_done = 0;
 
     current_heading_deg += (float)heading_delta_deg;
 
@@ -553,6 +586,18 @@ CY_ISR(ISR_Handler_1)
 
             /* Check whether this line is MAKE */
             int is_make_command = (strncmp(p, "make", 4) == 0);
+
+            /* The parser chooses IFELSE branches here, in the UART1 ISR.
+             * Only accept a new command at a confirmed, stationary position.
+             * Do not let a command overwrite an active multi-grid sequence.
+             */
+            if (camera_state != CAMERA_READY || waiting_for_uart ||
+                executing_while || current_cmd_idx < cmd_count)
+            {
+                UART_1_PutString("BUSY: moving/scanning; retry command when stopped\r\n");
+                rx_index = 0;
+                return;
+            }
 
             /* New movement/program command starts a new queue */
             if (!is_make_command)
@@ -1086,9 +1131,17 @@ CY_ISR(ISR_Handler_1)
         
 } 
 
-/* Publish a complete camera value before the UART1 command ISR can read it.
- * The existing MAKE, IFELSE and WHILE paths share this variable table.
- */
+/* Start the stopped-only settling interval and discard in-flight readings. */
+static void begin_camera_scan(void)
+{
+    camera_state = CAMERA_SETTLING;
+    stop_motors();
+    camera_stop_ms = camera_ms;
+    uart_msg_received = 0;
+    UART_2_ClearRxBuffer();
+}
+
+/* Publish atomically: the UART1 command ISR also reads this variable table. */
 static void update_camera_vowel(uint8 camera_rx)
 {
     uint8 interrupt_state = CyEnterCriticalSection();
@@ -1108,6 +1161,7 @@ static void update_camera_vowel(uint8 camera_rx)
 
         /* Wake the existing WHILE wait, including repeated detections. */
         uart_msg_received = 1;
+        camera_state = CAMERA_READY;
     }
     CyExitCriticalSection(interrupt_state);
 }
@@ -1115,21 +1169,36 @@ static void update_camera_vowel(uint8 camera_rx)
 /* Camera protocol: one A/E/I/O/U or N byte per detection (either case).
  * Camera TX -> UART_2 RX (P15[5]); UART_2 TX (P12[7]) -> USB-UART RX.
  * Updates :vowel for existing conditions and reports detections to Termite.
- * Service occasional detections only: the existing loop delays 100 ms and
- * UART_2 currently has a four-byte RX FIFO with no software RX interrupt.
+ * Drain/discard during motion and settling. After the settling interval,
+ * flush once more and require a newly received valid byte before proceeding.
  */
 static void check_camera_uart(void)
 {
     uint8 camera_rx;
+    static uint8 last_reported = 0u;
+    uint8 report_result;
     char camera_message[] = "CAMERA DETECTED: A\r\n";
 
-    while (UART_2_GetRxBufferSize() > 0u)
+    if (camera_state == CAMERA_MOVING || camera_state == CAMERA_SETTLING)
+    {
+        UART_2_ClearRxBuffer();
+        if (camera_state == CAMERA_SETTLING &&
+            (uint32)(camera_ms - camera_stop_ms) >= CAMERA_SETTLE_MS)
+        {
+            camera_state = CAMERA_WAIT_RESULT;
+        }
+        return;
+    }
+
+    /* Bound service time even if the camera transmits continuously. */
+    if (UART_2_GetRxBufferSize() > 0u)
     {
         camera_rx = UART_2_GetChar();
         if (camera_rx >= 'a' && camera_rx <= 'z')
         {
             camera_rx = (uint8)(camera_rx - 'a' + 'A');
         }
+        report_result = (camera_state == CAMERA_WAIT_RESULT || camera_rx != last_reported);
 
         switch (camera_rx)
         {
@@ -1140,12 +1209,14 @@ static void check_camera_uart(void)
             case 'U':
                 update_camera_vowel(camera_rx);
                 camera_message[sizeof("CAMERA DETECTED: ") - 1u] = (char)camera_rx;
-                UART_2_PutString(camera_message);
+                if (report_result) UART_2_PutString(camera_message);
+                last_reported = camera_rx;
                 break;
 
             case 'N':
                 update_camera_vowel(camera_rx);
-                UART_2_PutString("NO VOWELS DETECTED\r\n");
+                if (report_result) UART_2_PutString("NO VOWELS DETECTED\r\n");
+                last_reported = camera_rx;
                 break;
 
             default:
@@ -1182,11 +1253,25 @@ int main(void)
     int start_c2 = QuadDec_2_GetCounter();
     int relative_c1 = 0;
     int relative_c2 = 0;
+
+    /* CySysTick uses a 1 ms period at the configured CPU clock. */
+    CySysTickStart();
+    CySysTickSetCallback(0u, camera_tick);
+    begin_camera_scan();
+    uint32 last_motor_update_ms = camera_ms;
     
     for(;;)
     { 
         /* Place your application code here. */
         check_camera_uart();
+
+        if (camera_state == CAMERA_SETTLING || camera_state == CAMERA_WAIT_RESULT)
+        {
+            /* Motors are already stopped; keep servicing UART while waiting.
+             * No valid camera result means remain stopped, never drive blind.
+             */
+            continue;
+        }
 
         if (waiting_for_uart)
         {
@@ -1220,6 +1305,15 @@ int main(void)
             continue;
         }
 
+        /* Preserve the nominal 100 ms motor update period without blocking
+         * UART servicing. Sample encoders when the update is actually due.
+         */
+        if ((uint32)(camera_ms - last_motor_update_ms) < MOTOR_CONTROL_PERIOD_MS)
+        {
+            continue;
+        }
+        last_motor_update_ms = camera_ms;
+
         if (request_reset_start)
         {
             request_reset_start = 0;
@@ -1232,7 +1326,6 @@ int main(void)
         relative_c1 = counter1 - start_c1;
         relative_c2 = counter2 - start_c2;
 
-        CyDelay(100);
         /* =========================
            WHILE BODY FINISHED
            ========================= */
@@ -1243,7 +1336,11 @@ int main(void)
 
             executing_while = 0;
             waiting_for_uart = 1;
-            uart_msg_received = 0;
+
+            /* Keep the result from the final grid's scan for the next check.
+             * An empty body has no final movement scan, so request one here.
+             */
+            if (!uart_msg_received) begin_camera_scan();
 
             UART_1_PutString("WAITING FOR UART...\r\n");
 
@@ -1277,7 +1374,17 @@ int main(void)
             current_cmd = &cmd_queue[current_cmd_idx];
         }
 
-        
+        if (current_cmd->type == 'f' || current_cmd->type == 'b' ||
+            current_cmd->type == 'l' || current_cmd->type == 'r')
+        {
+            if (current_cmd->param == 0)
+            {
+                advance_command_index(0);
+                continue;
+            }
+            camera_state = CAMERA_MOVING;
+        }
+
         switch (current_cmd->type)
         {
             case 'w': //while
@@ -1308,7 +1415,8 @@ int main(void)
                 int pulses_per_step = heading_is_diagonal(current_heading_deg)
                                            ? PULSES_PER_DIAGONAL
                                            : PULSES_PER_GRID;
-                int target = current_cmd->param * pulses_per_step;
+                /* One grid per segment; advance_command_index tracks the rest. */
+                int target = (current_cmd->param < 0 ? -1 : 1) * pulses_per_step;
 
                 /*
                  * P-control (KP) keeps the two wheels' encoder counts
@@ -1387,7 +1495,8 @@ int main(void)
                 int pulses_per_step = heading_is_diagonal(current_heading_deg)
                                            ? PULSES_PER_DIAGONAL
                                            : PULSES_PER_GRID;
-                int target = current_cmd->param * pulses_per_step;
+                /* One grid per segment; advance_command_index tracks the rest. */
+                int target = (current_cmd->param < 0 ? -1 : 1) * pulses_per_step;
 
                 int error = relative_c2 - relative_c1;
                 int pwm_slave = compute_slave_pwm(error);
