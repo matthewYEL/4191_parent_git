@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 1
 
 
    1              		.syntax unified
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
   28:Generated_Source\PSoC5/QuadDec_1.c **** /*******************************************************************************
   29:Generated_Source\PSoC5/QuadDec_1.c **** * Function Name: QuadDec_1_Init
   30:Generated_Source\PSoC5/QuadDec_1.c **** ********************************************************************************
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 2
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 2
 
 
   31:Generated_Source\PSoC5/QuadDec_1.c **** *
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
   68:Generated_Source\PSoC5/QuadDec_1.c **** *
   69:Generated_Source\PSoC5/QuadDec_1.c **** *******************************************************************************/
   70:Generated_Source\PSoC5/QuadDec_1.c **** void QuadDec_1_Enable(void) 
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 3
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 3
 
 
   71:Generated_Source\PSoC5/QuadDec_1.c **** {
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  125:Generated_Source\PSoC5/QuadDec_1.c ****         QuadDec_1_Cnt16_Start();
  126:Generated_Source\PSoC5/QuadDec_1.c ****         QuadDec_1_Cnt16_WriteCounter(QuadDec_1_COUNTER_INIT_VALUE);
  127:Generated_Source\PSoC5/QuadDec_1.c ****     #endif /* QuadDec_1_COUNTER_SIZE == QuadDec_1_COUNTER_SIZE_8_BIT */
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 4
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 4
 
 
  128:Generated_Source\PSoC5/QuadDec_1.c ****     
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  170:Generated_Source\PSoC5/QuadDec_1.c ****     enableInterrupts = CyEnterCriticalSection();
   57              		.loc 1 170 0
   58 0006 FFF7FEFF 		bl	CyEnterCriticalSection
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 5
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 5
 
 
   59              	.LVL1:
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  200:Generated_Source\PSoC5/QuadDec_1.c **** *
  201:Generated_Source\PSoC5/QuadDec_1.c **** *******************************************************************************/
  202:Generated_Source\PSoC5/QuadDec_1.c **** int16 QuadDec_1_GetCounter(void) 
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 6
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 6
 
 
  203:Generated_Source\PSoC5/QuadDec_1.c **** {
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  107              		.thumb
  108              		.thumb_func
  109              		.type	QuadDec_1_SetCounter, %function
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 7
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 7
 
 
  110              	QuadDec_1_SetCounter:
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  131              	.L9:
  267:Generated_Source\PSoC5/QuadDec_1.c ****         }
  268:Generated_Source\PSoC5/QuadDec_1.c ****         else
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 8
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 8
 
 
  269:Generated_Source\PSoC5/QuadDec_1.c ****         {
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  303:Generated_Source\PSoC5/QuadDec_1.c **** *    Bit      Description
  304:Generated_Source\PSoC5/QuadDec_1.c **** *     0        Counter overflow.
  305:Generated_Source\PSoC5/QuadDec_1.c **** *     1        Counter underflow.
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 9
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 9
 
 
  306:Generated_Source\PSoC5/QuadDec_1.c **** *     2        Counter reset due to index, if index input is used.
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  178              		.loc 1 333 0
  179              		.cfi_startproc
  180              		@ args = 0, pretend = 0, frame = 0
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 10
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 10
 
 
  181              		@ frame_needed = 0, uses_anonymous_args = 0
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  223 0012 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
  224 0014 43F01003 		orr	r3, r3, #16
  225 0018 1370     		strb	r3, [r2]
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 11
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 11
 
 
   84:Generated_Source\PSoC5/QuadDec_1.c **** 
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  273              	.L26:
  274              		.align	2
  275              	.L25:
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 12
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 12
 
 
  276 0020 00000000 		.word	.LANCHOR0
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  307              		.bss
  308              		.set	.LANCHOR0,. + 0
  309              		.type	QuadDec_1_initVar, %object
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 13
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 13
 
 
  310              		.size	QuadDec_1_initVar, 1
@@ -736,10 +736,10 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  322 0006 00000000 		.4byte	.Ldebug_abbrev0
  323 000a 04       		.byte	0x4
  324 000b 01       		.uleb128 0x1
- 325 000c DE010000 		.4byte	.LASF37
+ 325 000c B5010000 		.4byte	.LASF37
  326 0010 0C       		.byte	0xc
- 327 0011 3E030000 		.4byte	.LASF38
- 328 0015 F0000000 		.4byte	.LASF39
+ 327 0011 15030000 		.4byte	.LASF38
+ 328 0015 10000000 		.4byte	.LASF39
  329 0019 00000000 		.4byte	.Ldebug_ranges0+0
  330 001d 00000000 		.4byte	0
  331 0021 00000000 		.4byte	.Ldebug_line0
@@ -750,102 +750,102 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  336 002c 03       		.uleb128 0x3
  337 002d 04       		.byte	0x4
  338 002e 07       		.byte	0x7
- 339 002f 8E010000 		.4byte	.LASF0
+ 339 002f 65010000 		.4byte	.LASF0
  340 0033 03       		.uleb128 0x3
  341 0034 08       		.byte	0x8
  342 0035 05       		.byte	0x5
- 343 0036 75020000 		.4byte	.LASF1
+ 343 0036 4C020000 		.4byte	.LASF1
  344 003a 03       		.uleb128 0x3
  345 003b 08       		.byte	0x8
  346 003c 04       		.byte	0x4
- 347 003d 17030000 		.4byte	.LASF2
+ 347 003d EE020000 		.4byte	.LASF2
  348 0041 03       		.uleb128 0x3
  349 0042 01       		.byte	0x1
  350 0043 06       		.byte	0x6
- 351 0044 23030000 		.4byte	.LASF3
+ 351 0044 FA020000 		.4byte	.LASF3
  352 0048 03       		.uleb128 0x3
  353 0049 01       		.byte	0x1
  354 004a 08       		.byte	0x8
- 355 004b A9000000 		.4byte	.LASF4
+ 355 004b E8000000 		.4byte	.LASF4
  356 004f 03       		.uleb128 0x3
  357 0050 02       		.byte	0x2
  358 0051 05       		.byte	0x5
- 359 0052 99020000 		.4byte	.LASF5
+ 359 0052 70020000 		.4byte	.LASF5
  360 0056 03       		.uleb128 0x3
  361 0057 02       		.byte	0x2
  362 0058 07       		.byte	0x7
- 363 0059 39000000 		.4byte	.LASF6
+ 363 0059 78000000 		.4byte	.LASF6
  364 005d 03       		.uleb128 0x3
  365 005e 04       		.byte	0x4
  366 005f 05       		.byte	0x5
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 14
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 14
 
 
- 367 0060 09030000 		.4byte	.LASF7
+ 367 0060 E0020000 		.4byte	.LASF7
  368 0064 03       		.uleb128 0x3
  369 0065 04       		.byte	0x4
  370 0066 07       		.byte	0x7
- 371 0067 D1000000 		.4byte	.LASF8
+ 371 0067 10010000 		.4byte	.LASF8
  372 006b 03       		.uleb128 0x3
  373 006c 08       		.byte	0x8
  374 006d 07       		.byte	0x7
- 375 006e 7D000000 		.4byte	.LASF9
+ 375 006e BC000000 		.4byte	.LASF9
  376 0072 03       		.uleb128 0x3
  377 0073 04       		.byte	0x4
  378 0074 07       		.byte	0x7
- 379 0075 6C020000 		.4byte	.LASF10
+ 379 0075 43020000 		.4byte	.LASF10
  380 0079 03       		.uleb128 0x3
  381 007a 01       		.byte	0x1
  382 007b 08       		.byte	0x8
- 383 007c 12030000 		.4byte	.LASF11
+ 383 007c E9020000 		.4byte	.LASF11
  384 0080 04       		.uleb128 0x4
- 385 0081 D4020000 		.4byte	.LASF12
+ 385 0081 AB020000 		.4byte	.LASF12
  386 0085 02       		.byte	0x2
  387 0086 E801     		.2byte	0x1e8
  388 0088 48000000 		.4byte	0x48
  389 008c 04       		.uleb128 0x4
- 390 008d 70010000 		.4byte	.LASF13
+ 390 008d 47010000 		.4byte	.LASF13
  391 0091 02       		.byte	0x2
  392 0092 E901     		.2byte	0x1e9
  393 0094 56000000 		.4byte	0x56
  394 0098 04       		.uleb128 0x4
- 395 0099 CB000000 		.4byte	.LASF14
+ 395 0099 0A010000 		.4byte	.LASF14
  396 009d 02       		.byte	0x2
  397 009e EC01     		.2byte	0x1ec
  398 00a0 4F000000 		.4byte	0x4f
  399 00a4 04       		.uleb128 0x4
- 400 00a5 E3000000 		.4byte	.LASF15
+ 400 00a5 22010000 		.4byte	.LASF15
  401 00a9 02       		.byte	0x2
  402 00aa ED01     		.2byte	0x1ed
  403 00ac 5D000000 		.4byte	0x5d
  404 00b0 03       		.uleb128 0x3
  405 00b1 04       		.byte	0x4
  406 00b2 04       		.byte	0x4
- 407 00b3 77000000 		.4byte	.LASF16
+ 407 00b3 B6000000 		.4byte	.LASF16
  408 00b7 03       		.uleb128 0x3
  409 00b8 08       		.byte	0x8
  410 00b9 04       		.byte	0x4
- 411 00ba 69010000 		.4byte	.LASF17
+ 411 00ba 40010000 		.4byte	.LASF17
  412 00be 04       		.uleb128 0x4
- 413 00bf C6000000 		.4byte	.LASF18
+ 413 00bf 05010000 		.4byte	.LASF18
  414 00c3 02       		.byte	0x2
  415 00c4 9202     		.2byte	0x292
  416 00c6 CA000000 		.4byte	0xca
  417 00ca 05       		.uleb128 0x5
  418 00cb 80000000 		.4byte	0x80
  419 00cf 06       		.uleb128 0x6
- 420 00d0 2F030000 		.4byte	.LASF40
+ 420 00d0 06030000 		.4byte	.LASF40
  421 00d4 01       		.byte	0x1
  422 00d5 2A       		.byte	0x2a
  423 00d6 00000000 		.4byte	.LFB0
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 15
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 15
 
 
  424 00da 02000000 		.4byte	.LFE0-.LFB0
  425 00de 01       		.uleb128 0x1
  426 00df 9C       		.byte	0x9c
  427 00e0 07       		.uleb128 0x7
- 428 00e1 B7000000 		.4byte	.LASF22
+ 428 00e1 F6000000 		.4byte	.LASF22
  429 00e5 01       		.byte	0x1
  430 00e6 9D       		.byte	0x9d
  431 00e7 00000000 		.4byte	.LFB3
@@ -854,7 +854,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  434 00f0 9C       		.byte	0x9c
  435 00f1 20010000 		.4byte	0x120
  436 00f5 08       		.uleb128 0x8
- 437 00f6 58010000 		.4byte	.LASF19
+ 437 00f6 2F010000 		.4byte	.LASF19
  438 00fa 01       		.byte	0x1
  439 00fb 9F       		.byte	0x9f
  440 00fc 80000000 		.4byte	0x80
@@ -870,7 +870,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  450 011b A7020000 		.4byte	0x2a7
  451 011f 00       		.byte	0
  452 0120 0A       		.uleb128 0xa
- 453 0121 62000000 		.4byte	.LASF41
+ 453 0121 A1000000 		.4byte	.LASF41
  454 0125 01       		.byte	0x1
  455 0126 CA       		.byte	0xca
  456 0127 98000000 		.4byte	0x98
@@ -880,14 +880,14 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  460 0134 9C       		.byte	0x9c
  461 0135 5F010000 		.4byte	0x15f
  462 0139 0B       		.uleb128 0xb
- 463 013a 33000000 		.4byte	.LASF20
+ 463 013a 72000000 		.4byte	.LASF20
  464 013e 01       		.byte	0x1
  465 013f CC       		.byte	0xcc
  466 0140 98000000 		.4byte	0x98
  467 0144 01       		.uleb128 0x1
  468 0145 50       		.byte	0x50
  469 0146 08       		.uleb128 0x8
- 470 0147 E9000000 		.4byte	.LASF21
+ 470 0147 28010000 		.4byte	.LASF21
  471 014b 01       		.byte	0x1
  472 014c CD       		.byte	0xcd
  473 014d 8C000000 		.4byte	0x8c
@@ -897,8 +897,8 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  477 015a B2020000 		.4byte	0x2b2
  478 015e 00       		.byte	0
  479 015f 0C       		.uleb128 0xc
- 480 0160 94000000 		.4byte	.LASF23
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 16
+ 480 0160 D3000000 		.4byte	.LASF23
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 16
 
 
  481 0164 01       		.byte	0x1
@@ -909,13 +909,13 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  486 0170 9C       		.byte	0x9c
  487 0171 9F010000 		.4byte	0x19f
  488 0175 0D       		.uleb128 0xd
- 489 0176 2D000000 		.4byte	.LASF25
+ 489 0176 6C000000 		.4byte	.LASF25
  490 017a 01       		.byte	0x1
  491 017b 0201     		.2byte	0x102
  492 017d 98000000 		.4byte	0x98
  493 0181 26000000 		.4byte	.LLST2
  494 0185 0E       		.uleb128 0xe
- 495 0186 33000000 		.4byte	.LASF20
+ 495 0186 72000000 		.4byte	.LASF20
  496 018a 01       		.byte	0x1
  497 018b 0601     		.2byte	0x106
  498 018d 8C000000 		.4byte	0x8c
@@ -925,7 +925,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  502 019a BD020000 		.4byte	0x2bd
  503 019e 00       		.byte	0
  504 019f 0F       		.uleb128 0xf
- 505 01a0 DA020000 		.4byte	.LASF29
+ 505 01a0 B1020000 		.4byte	.LASF29
  506 01a4 01       		.byte	0x1
  507 01a5 3601     		.2byte	0x136
  508 01a7 80000000 		.4byte	0x80
@@ -934,7 +934,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  511 01b3 01       		.uleb128 0x1
  512 01b4 9C       		.byte	0x9c
  513 01b5 0C       		.uleb128 0xc
- 514 01b6 EE020000 		.4byte	.LASF24
+ 514 01b6 C5020000 		.4byte	.LASF24
  515 01ba 01       		.byte	0x1
  516 01bb 4C01     		.2byte	0x14c
  517 01bd 00000000 		.4byte	.LFB7
@@ -943,7 +943,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  520 01c6 9C       		.byte	0x9c
  521 01c7 DA010000 		.4byte	0x1da
  522 01cb 10       		.uleb128 0x10
- 523 01cc 83020000 		.4byte	.LASF26
+ 523 01cc 5A020000 		.4byte	.LASF26
  524 01d0 01       		.byte	0x1
  525 01d1 4C01     		.2byte	0x14c
  526 01d3 80000000 		.4byte	0x80
@@ -951,19 +951,19 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  528 01d8 50       		.byte	0x50
  529 01d9 00       		.byte	0
  530 01da 07       		.uleb128 0x7
- 531 01db 88020000 		.4byte	.LASF27
+ 531 01db 5F020000 		.4byte	.LASF27
  532 01df 01       		.byte	0x1
  533 01e0 46       		.byte	0x46
  534 01e1 00000000 		.4byte	.LFB1
  535 01e5 24000000 		.4byte	.LFE1-.LFB1
  536 01e9 01       		.uleb128 0x1
  537 01ea 9C       		.byte	0x9c
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 17
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 17
 
 
  538 01eb 2D020000 		.4byte	0x22d
  539 01ef 08       		.uleb128 0x8
- 540 01f0 58010000 		.4byte	.LASF19
+ 540 01f0 2F010000 		.4byte	.LASF19
  541 01f4 01       		.byte	0x1
  542 01f5 48       		.byte	0x48
  543 01f6 80000000 		.4byte	0x80
@@ -1016,9 +1016,9 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  590 0265 DA010000 		.4byte	0x1da
  591 0269 00       		.byte	0
  592 026a 0F       		.uleb128 0xf
- 593 026b AD010000 		.4byte	.LASF30
+ 593 026b 84010000 		.4byte	.LASF30
  594 026f 01       		.byte	0x1
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 18
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 18
 
 
  595 0270 6801     		.2byte	0x168
@@ -1028,7 +1028,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  599 027e 01       		.uleb128 0x1
  600 027f 9C       		.byte	0x9c
  601 0280 13       		.uleb128 0x13
- 602 0281 9B010000 		.4byte	.LASF42
+ 602 0281 72010000 		.4byte	.LASF42
  603 0285 01       		.byte	0x1
  604 0286 19       		.byte	0x19
  605 0287 80000000 		.4byte	0x80
@@ -1036,33 +1036,33 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  607 028c 03       		.byte	0x3
  608 028d 00000000 		.4byte	QuadDec_1_initVar
  609 0291 14       		.uleb128 0x14
- 610 0292 A3020000 		.4byte	.LASF31
- 611 0296 A3020000 		.4byte	.LASF31
+ 610 0292 7A020000 		.4byte	.LASF31
+ 611 0296 7A020000 		.4byte	.LASF31
  612 029a 03       		.byte	0x3
  613 029b 50       		.byte	0x50
  614 029c 14       		.uleb128 0x14
- 615 029d 77010000 		.4byte	.LASF32
- 616 02a1 77010000 		.4byte	.LASF32
+ 615 029d 4E010000 		.4byte	.LASF32
+ 616 02a1 4E010000 		.4byte	.LASF32
  617 02a5 04       		.byte	0x4
  618 02a6 7D       		.byte	0x7d
  619 02a7 14       		.uleb128 0x14
- 620 02a8 C8010000 		.4byte	.LASF33
- 621 02ac C8010000 		.4byte	.LASF33
+ 620 02a8 9F010000 		.4byte	.LASF33
+ 621 02ac 9F010000 		.4byte	.LASF33
  622 02b0 04       		.byte	0x4
  623 02b1 7E       		.byte	0x7e
  624 02b2 14       		.uleb128 0x14
- 625 02b3 B8020000 		.4byte	.LASF34
- 626 02b7 B8020000 		.4byte	.LASF34
+ 625 02b3 8F020000 		.4byte	.LASF34
+ 626 02b7 8F020000 		.4byte	.LASF34
  627 02bb 03       		.byte	0x3
  628 02bc 5D       		.byte	0x5d
  629 02bd 14       		.uleb128 0x14
- 630 02be 10000000 		.4byte	.LASF35
- 631 02c2 10000000 		.4byte	.LASF35
+ 630 02be 4F000000 		.4byte	.LASF35
+ 631 02c2 4F000000 		.4byte	.LASF35
  632 02c6 03       		.byte	0x3
  633 02c7 5A       		.byte	0x5a
  634 02c8 14       		.uleb128 0x14
- 635 02c9 4C000000 		.4byte	.LASF36
- 636 02cd 4C000000 		.4byte	.LASF36
+ 635 02c9 8B000000 		.4byte	.LASF36
+ 636 02cd 8B000000 		.4byte	.LASF36
  637 02d1 03       		.byte	0x3
  638 02d2 4F       		.byte	0x4f
  639 02d3 00       		.byte	0
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  649 0007 03       		.uleb128 0x3
  650 0008 0E       		.uleb128 0xe
  651 0009 1B       		.uleb128 0x1b
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 19
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 19
 
 
  652 000a 0E       		.uleb128 0xe
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  706 0040 3F       		.uleb128 0x3f
  707 0041 19       		.uleb128 0x19
  708 0042 03       		.uleb128 0x3
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 20
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 20
 
 
  709 0043 0E       		.uleb128 0xe
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  763 007b 17       		.uleb128 0x17
  764 007c 00       		.byte	0
  765 007d 00       		.byte	0
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 21
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 21
 
 
  766 007e 09       		.uleb128 0x9
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  820 00b7 3F       		.uleb128 0x3f
  821 00b8 19       		.uleb128 0x19
  822 00b9 03       		.uleb128 0x3
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 22
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 22
 
 
  823 00ba 0E       		.uleb128 0xe
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  877 00f1 03       		.uleb128 0x3
  878 00f2 0E       		.uleb128 0xe
  879 00f3 3A       		.uleb128 0x3a
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 23
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 23
 
 
  880 00f4 0B       		.uleb128 0xb
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  934 0130 00       		.byte	0
  935 0131 03       		.uleb128 0x3
  936 0132 0E       		.uleb128 0xe
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 24
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 24
 
 
  937 0133 3A       		.uleb128 0x3a
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  991 003b F3       		.byte	0xf3
  992 003c 01       		.uleb128 0x1
  993 003d 50       		.byte	0x50
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 25
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 25
 
 
  994 003e 9F       		.byte	0x9f
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  1048 000c 20000000 		.4byte	.LFE3
  1049 0010 00000000 		.4byte	.LFB4
  1050 0014 0E000000 		.4byte	.LFE4
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 26
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 26
 
 
  1051 0018 00000000 		.4byte	.LFB5
@@ -1527,235 +1527,232 @@ ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 1
  1069      4465635F 
  1069      315F5374 
  1069      61727400 
- 1070              	.LASF35:
- 1071 0010 51756164 		.ascii	"QuadDec_1_Cnt16_WriteCounter\000"
- 1071      4465635F 
- 1071      315F436E 
- 1071      7431365F 
- 1071      57726974 
- 1072              	.LASF25:
- 1073 002d 76616C75 		.ascii	"value\000"
- 1073      6500
- 1074              	.LASF20:
- 1075 0033 636F756E 		.ascii	"count\000"
- 1075      7400
- 1076              	.LASF6:
- 1077 0039 73686F72 		.ascii	"short unsigned int\000"
- 1077      7420756E 
- 1077      7369676E 
- 1077      65642069 
- 1077      6E7400
- 1078              	.LASF36:
- 1079 004c 51756164 		.ascii	"QuadDec_1_Cnt16_Start\000"
- 1079      4465635F 
- 1079      315F436E 
- 1079      7431365F 
- 1079      53746172 
- 1080              	.LASF41:
- 1081 0062 51756164 		.ascii	"QuadDec_1_GetCounter\000"
- 1081      4465635F 
- 1081      315F4765 
- 1081      74436F75 
- 1081      6E746572 
- 1082              	.LASF16:
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 27
+ 1070              	.LASF39:
+ 1071 0010 443A5C79 		.ascii	"D:\\y3s1\\ECE4191\\project\\github\\DC_ Motor_test_"
+ 1071      3373315C 
+ 1071      45434534 
+ 1071      3139315C 
+ 1071      70726F6A 
+ 1072 003e 315C4465 		.ascii	"1\\Design01.cydsn\000"
+ 1072      7369676E 
+ 1072      30312E63 
+ 1072      7964736E 
+ 1072      00
+ 1073              	.LASF35:
+ 1074 004f 51756164 		.ascii	"QuadDec_1_Cnt16_WriteCounter\000"
+ 1074      4465635F 
+ 1074      315F436E 
+ 1074      7431365F 
+ 1074      57726974 
+ 1075              	.LASF25:
+ 1076 006c 76616C75 		.ascii	"value\000"
+ 1076      6500
+ 1077              	.LASF20:
+ 1078 0072 636F756E 		.ascii	"count\000"
+ 1078      7400
+ 1079              	.LASF6:
+ 1080 0078 73686F72 		.ascii	"short unsigned int\000"
+ 1080      7420756E 
+ 1080      7369676E 
+ 1080      65642069 
+ 1080      6E7400
+ 1081              	.LASF36:
+ 1082 008b 51756164 		.ascii	"QuadDec_1_Cnt16_Start\000"
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 27
 
 
- 1083 0077 666C6F61 		.ascii	"float\000"
- 1083      7400
- 1084              	.LASF9:
- 1085 007d 6C6F6E67 		.ascii	"long long unsigned int\000"
- 1085      206C6F6E 
- 1085      6720756E 
- 1085      7369676E 
- 1085      65642069 
- 1086              	.LASF23:
- 1087 0094 51756164 		.ascii	"QuadDec_1_SetCounter\000"
- 1087      4465635F 
- 1087      315F5365 
- 1087      74436F75 
- 1087      6E746572 
- 1088              	.LASF4:
- 1089 00a9 756E7369 		.ascii	"unsigned char\000"
- 1089      676E6564 
- 1089      20636861 
- 1089      7200
- 1090              	.LASF22:
- 1091 00b7 51756164 		.ascii	"QuadDec_1_Stop\000"
- 1091      4465635F 
- 1091      315F5374 
- 1091      6F7000
- 1092              	.LASF18:
- 1093 00c6 72656738 		.ascii	"reg8\000"
- 1093      00
- 1094              	.LASF14:
- 1095 00cb 696E7431 		.ascii	"int16\000"
- 1095      3600
- 1096              	.LASF8:
- 1097 00d1 6C6F6E67 		.ascii	"long unsigned int\000"
- 1097      20756E73 
- 1097      69676E65 
- 1097      6420696E 
- 1097      7400
- 1098              	.LASF15:
- 1099 00e3 696E7433 		.ascii	"int32\000"
- 1099      3200
- 1100              	.LASF21:
- 1101 00e9 746D7043 		.ascii	"tmpCnt\000"
- 1101      6E7400
- 1102              	.LASF39:
- 1103 00f0 433A5C55 		.ascii	"C:\\Users\\ywlim\\Downloads\\3\\DC_ Motor_test_1 - "
- 1103      73657273 
- 1103      5C79776C 
- 1103      696D5C44 
- 1103      6F776E6C 
- 1104 011e 50636F6E 		.ascii	"Pcontroller\\DC_ Motor_test_1 - Pcontroller\\Design"
- 1104      74726F6C 
- 1104      6C65725C 
- 1104      44435F20 
- 1104      4D6F746F 
- 1105 014f 30312E63 		.ascii	"01.cydsn\000"
- 1105      7964736E 
- 1105      00
- 1106              	.LASF19:
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 28
+ 1082      4465635F 
+ 1082      315F436E 
+ 1082      7431365F 
+ 1082      53746172 
+ 1083              	.LASF41:
+ 1084 00a1 51756164 		.ascii	"QuadDec_1_GetCounter\000"
+ 1084      4465635F 
+ 1084      315F4765 
+ 1084      74436F75 
+ 1084      6E746572 
+ 1085              	.LASF16:
+ 1086 00b6 666C6F61 		.ascii	"float\000"
+ 1086      7400
+ 1087              	.LASF9:
+ 1088 00bc 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1088      206C6F6E 
+ 1088      6720756E 
+ 1088      7369676E 
+ 1088      65642069 
+ 1089              	.LASF23:
+ 1090 00d3 51756164 		.ascii	"QuadDec_1_SetCounter\000"
+ 1090      4465635F 
+ 1090      315F5365 
+ 1090      74436F75 
+ 1090      6E746572 
+ 1091              	.LASF4:
+ 1092 00e8 756E7369 		.ascii	"unsigned char\000"
+ 1092      676E6564 
+ 1092      20636861 
+ 1092      7200
+ 1093              	.LASF22:
+ 1094 00f6 51756164 		.ascii	"QuadDec_1_Stop\000"
+ 1094      4465635F 
+ 1094      315F5374 
+ 1094      6F7000
+ 1095              	.LASF18:
+ 1096 0105 72656738 		.ascii	"reg8\000"
+ 1096      00
+ 1097              	.LASF14:
+ 1098 010a 696E7431 		.ascii	"int16\000"
+ 1098      3600
+ 1099              	.LASF8:
+ 1100 0110 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1100      20756E73 
+ 1100      69676E65 
+ 1100      6420696E 
+ 1100      7400
+ 1101              	.LASF15:
+ 1102 0122 696E7433 		.ascii	"int32\000"
+ 1102      3200
+ 1103              	.LASF21:
+ 1104 0128 746D7043 		.ascii	"tmpCnt\000"
+ 1104      6E7400
+ 1105              	.LASF19:
+ 1106 012f 656E6162 		.ascii	"enableInterrupts\000"
+ 1106      6C65496E 
+ 1106      74657272 
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 28
 
 
- 1107 0158 656E6162 		.ascii	"enableInterrupts\000"
- 1107      6C65496E 
- 1107      74657272 
- 1107      75707473 
- 1107      00
- 1108              	.LASF17:
- 1109 0169 646F7562 		.ascii	"double\000"
- 1109      6C6500
- 1110              	.LASF13:
- 1111 0170 75696E74 		.ascii	"uint16\000"
- 1111      313600
- 1112              	.LASF32:
- 1113 0177 4379456E 		.ascii	"CyEnterCriticalSection\000"
- 1113      74657243 
- 1113      72697469 
- 1113      63616C53 
- 1113      65637469 
- 1114              	.LASF0:
- 1115 018e 756E7369 		.ascii	"unsigned int\000"
- 1115      676E6564 
- 1115      20696E74 
- 1115      00
- 1116              	.LASF42:
- 1117 019b 51756164 		.ascii	"QuadDec_1_initVar\000"
- 1117      4465635F 
- 1117      315F696E 
- 1117      69745661 
- 1117      7200
- 1118              	.LASF30:
- 1119 01ad 51756164 		.ascii	"QuadDec_1_GetInterruptMask\000"
- 1119      4465635F 
- 1119      315F4765 
- 1119      74496E74 
- 1119      65727275 
- 1120              	.LASF33:
- 1121 01c8 43794578 		.ascii	"CyExitCriticalSection\000"
- 1121      69744372 
- 1121      69746963 
- 1121      616C5365 
- 1121      6374696F 
- 1122              	.LASF37:
- 1123 01de 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
- 1123      43313120 
- 1123      352E342E 
- 1123      31203230 
- 1123      31363036 
- 1124 0211 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
- 1124      20726576 
- 1124      6973696F 
- 1124      6E203233 
- 1124      37373135 
- 1125 0244 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
- 1125      66756E63 
- 1125      74696F6E 
- 1125      2D736563 
- 1125      74696F6E 
- 1126              	.LASF10:
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 29
+ 1106      75707473 
+ 1106      00
+ 1107              	.LASF17:
+ 1108 0140 646F7562 		.ascii	"double\000"
+ 1108      6C6500
+ 1109              	.LASF13:
+ 1110 0147 75696E74 		.ascii	"uint16\000"
+ 1110      313600
+ 1111              	.LASF32:
+ 1112 014e 4379456E 		.ascii	"CyEnterCriticalSection\000"
+ 1112      74657243 
+ 1112      72697469 
+ 1112      63616C53 
+ 1112      65637469 
+ 1113              	.LASF0:
+ 1114 0165 756E7369 		.ascii	"unsigned int\000"
+ 1114      676E6564 
+ 1114      20696E74 
+ 1114      00
+ 1115              	.LASF42:
+ 1116 0172 51756164 		.ascii	"QuadDec_1_initVar\000"
+ 1116      4465635F 
+ 1116      315F696E 
+ 1116      69745661 
+ 1116      7200
+ 1117              	.LASF30:
+ 1118 0184 51756164 		.ascii	"QuadDec_1_GetInterruptMask\000"
+ 1118      4465635F 
+ 1118      315F4765 
+ 1118      74496E74 
+ 1118      65727275 
+ 1119              	.LASF33:
+ 1120 019f 43794578 		.ascii	"CyExitCriticalSection\000"
+ 1120      69744372 
+ 1120      69746963 
+ 1120      616C5365 
+ 1120      6374696F 
+ 1121              	.LASF37:
+ 1122 01b5 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1122      43313120 
+ 1122      352E342E 
+ 1122      31203230 
+ 1122      31363036 
+ 1123 01e8 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 1123      20726576 
+ 1123      6973696F 
+ 1123      6E203233 
+ 1123      37373135 
+ 1124 021b 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1124      66756E63 
+ 1124      74696F6E 
+ 1124      2D736563 
+ 1124      74696F6E 
+ 1125              	.LASF10:
+ 1126 0243 73697A65 		.ascii	"sizetype\000"
+ 1126      74797065 
+ 1126      00
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 29
 
 
- 1127 026c 73697A65 		.ascii	"sizetype\000"
- 1127      74797065 
- 1127      00
- 1128              	.LASF1:
- 1129 0275 6C6F6E67 		.ascii	"long long int\000"
- 1129      206C6F6E 
- 1129      6720696E 
- 1129      7400
- 1130              	.LASF26:
- 1131 0283 6D61736B 		.ascii	"mask\000"
- 1131      00
- 1132              	.LASF27:
- 1133 0288 51756164 		.ascii	"QuadDec_1_Enable\000"
- 1133      4465635F 
- 1133      315F456E 
- 1133      61626C65 
- 1133      00
- 1134              	.LASF5:
- 1135 0299 73686F72 		.ascii	"short int\000"
- 1135      7420696E 
- 1135      7400
- 1136              	.LASF31:
- 1137 02a3 51756164 		.ascii	"QuadDec_1_Cnt16_Stop\000"
- 1137      4465635F 
- 1137      315F436E 
- 1137      7431365F 
- 1137      53746F70 
- 1138              	.LASF34:
- 1139 02b8 51756164 		.ascii	"QuadDec_1_Cnt16_ReadCounter\000"
- 1139      4465635F 
- 1139      315F436E 
- 1139      7431365F 
- 1139      52656164 
- 1140              	.LASF12:
- 1141 02d4 75696E74 		.ascii	"uint8\000"
- 1141      3800
- 1142              	.LASF29:
- 1143 02da 51756164 		.ascii	"QuadDec_1_GetEvents\000"
- 1143      4465635F 
- 1143      315F4765 
- 1143      74457665 
- 1143      6E747300 
- 1144              	.LASF24:
- 1145 02ee 51756164 		.ascii	"QuadDec_1_SetInterruptMask\000"
- 1145      4465635F 
- 1145      315F5365 
- 1145      74496E74 
- 1145      65727275 
- 1146              	.LASF7:
- 1147 0309 6C6F6E67 		.ascii	"long int\000"
- 1147      20696E74 
- 1147      00
- 1148              	.LASF11:
- 1149 0312 63686172 		.ascii	"char\000"
- 1149      00
- 1150              	.LASF2:
- 1151 0317 6C6F6E67 		.ascii	"long double\000"
-ARM GAS  C:\Users\ywlim\AppData\Local\Temp\ccJrzrGY.s 			page 30
+ 1127              	.LASF1:
+ 1128 024c 6C6F6E67 		.ascii	"long long int\000"
+ 1128      206C6F6E 
+ 1128      6720696E 
+ 1128      7400
+ 1129              	.LASF26:
+ 1130 025a 6D61736B 		.ascii	"mask\000"
+ 1130      00
+ 1131              	.LASF27:
+ 1132 025f 51756164 		.ascii	"QuadDec_1_Enable\000"
+ 1132      4465635F 
+ 1132      315F456E 
+ 1132      61626C65 
+ 1132      00
+ 1133              	.LASF5:
+ 1134 0270 73686F72 		.ascii	"short int\000"
+ 1134      7420696E 
+ 1134      7400
+ 1135              	.LASF31:
+ 1136 027a 51756164 		.ascii	"QuadDec_1_Cnt16_Stop\000"
+ 1136      4465635F 
+ 1136      315F436E 
+ 1136      7431365F 
+ 1136      53746F70 
+ 1137              	.LASF34:
+ 1138 028f 51756164 		.ascii	"QuadDec_1_Cnt16_ReadCounter\000"
+ 1138      4465635F 
+ 1138      315F436E 
+ 1138      7431365F 
+ 1138      52656164 
+ 1139              	.LASF12:
+ 1140 02ab 75696E74 		.ascii	"uint8\000"
+ 1140      3800
+ 1141              	.LASF29:
+ 1142 02b1 51756164 		.ascii	"QuadDec_1_GetEvents\000"
+ 1142      4465635F 
+ 1142      315F4765 
+ 1142      74457665 
+ 1142      6E747300 
+ 1143              	.LASF24:
+ 1144 02c5 51756164 		.ascii	"QuadDec_1_SetInterruptMask\000"
+ 1144      4465635F 
+ 1144      315F5365 
+ 1144      74496E74 
+ 1144      65727275 
+ 1145              	.LASF7:
+ 1146 02e0 6C6F6E67 		.ascii	"long int\000"
+ 1146      20696E74 
+ 1146      00
+ 1147              	.LASF11:
+ 1148 02e9 63686172 		.ascii	"char\000"
+ 1148      00
+ 1149              	.LASF2:
+ 1150 02ee 6C6F6E67 		.ascii	"long double\000"
+ 1150      20646F75 
+ 1150      626C6500 
+ 1151              	.LASF3:
+ARM GAS  C:\Users\ywlim\AppData\Local\Temp\cculoDbx.s 			page 30
 
 
- 1151      20646F75 
- 1151      626C6500 
- 1152              	.LASF3:
- 1153 0323 7369676E 		.ascii	"signed char\000"
- 1153      65642063 
- 1153      68617200 
- 1154              	.LASF40:
- 1155 032f 51756164 		.ascii	"QuadDec_1_Init\000"
- 1155      4465635F 
- 1155      315F496E 
- 1155      697400
- 1156              	.LASF38:
- 1157 033e 47656E65 		.ascii	"Generated_Source\\PSoC5\\QuadDec_1.c\000"
- 1157      72617465 
- 1157      645F536F 
- 1157      75726365 
- 1157      5C50536F 
- 1158              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
+ 1152 02fa 7369676E 		.ascii	"signed char\000"
+ 1152      65642063 
+ 1152      68617200 
+ 1153              	.LASF40:
+ 1154 0306 51756164 		.ascii	"QuadDec_1_Init\000"
+ 1154      4465635F 
+ 1154      315F496E 
+ 1154      697400
+ 1155              	.LASF38:
+ 1156 0315 47656E65 		.ascii	"Generated_Source\\PSoC5\\QuadDec_1.c\000"
+ 1156      72617465 
+ 1156      645F536F 
+ 1156      75726365 
+ 1156      5C50536F 
+ 1157              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
