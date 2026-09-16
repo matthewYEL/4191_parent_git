@@ -211,8 +211,9 @@ typedef struct {
     char value[20];
 } TurtleVariable;
 
-TurtleVariable variables[10];
-int variable_count = 0;
+/* Camera updates :vowel automatically; no initial MAKE is required. */
+TurtleVariable variables[10] = {{"vowel", "blank"}};
+int variable_count = 1;
 
 char while_var_name[20];
 char while_expected_value[20];
@@ -1085,6 +1086,75 @@ CY_ISR(ISR_Handler_1)
         
 } 
 
+/* Publish a complete camera value before the UART1 command ISR can read it.
+ * The existing MAKE, IFELSE and WHILE paths share this variable table.
+ */
+static void update_camera_vowel(uint8 camera_rx)
+{
+    uint8 interrupt_state = CyEnterCriticalSection();
+    char *value = get_variable("vowel");
+
+    if (value != NULL)
+    {
+        if (camera_rx == 'N')
+        {
+            strcpy(value, "NONE");
+        }
+        else
+        {
+            value[0] = (char)(camera_rx - 'A' + 'a');
+            value[1] = '\0';
+        }
+
+        /* Wake the existing WHILE wait, including repeated detections. */
+        uart_msg_received = 1;
+    }
+    CyExitCriticalSection(interrupt_state);
+}
+
+/* Camera protocol: one A/E/I/O/U or N byte per detection (either case).
+ * Camera TX -> UART_2 RX (P15[5]); UART_2 TX (P12[7]) -> USB-UART RX.
+ * Updates :vowel for existing conditions and reports detections to Termite.
+ * Service occasional detections only: the existing loop delays 100 ms and
+ * UART_2 currently has a four-byte RX FIFO with no software RX interrupt.
+ */
+static void check_camera_uart(void)
+{
+    uint8 camera_rx;
+    char camera_message[] = "CAMERA DETECTED: A\r\n";
+
+    while (UART_2_GetRxBufferSize() > 0u)
+    {
+        camera_rx = UART_2_GetChar();
+        if (camera_rx >= 'a' && camera_rx <= 'z')
+        {
+            camera_rx = (uint8)(camera_rx - 'a' + 'A');
+        }
+
+        switch (camera_rx)
+        {
+            case 'A':
+            case 'E':
+            case 'I':
+            case 'O':
+            case 'U':
+                update_camera_vowel(camera_rx);
+                camera_message[sizeof("CAMERA DETECTED: ") - 1u] = (char)camera_rx;
+                UART_2_PutString(camera_message);
+                break;
+
+            case 'N':
+                update_camera_vowel(camera_rx);
+                UART_2_PutString("NO VOWELS DETECTED\r\n");
+                break;
+
+            default:
+                /* Ignore separators and unsupported bytes. */
+                break;
+        }
+    }
+}
+
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
@@ -1092,6 +1162,7 @@ int main(void)
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
     UART_1_Start();
     UART_2_Start();
+    UART_2_PutString("UART2 READY\r\n");
     isr_1_StartEx(ISR_Handler_1);
     UART_1_PutString("START...........");
     UART_1_PutString("\n");
@@ -1115,6 +1186,8 @@ int main(void)
     for(;;)
     { 
         /* Place your application code here. */
+        check_camera_uart();
+
         if (waiting_for_uart)
         {
             if (!uart_msg_received)
