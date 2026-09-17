@@ -150,6 +150,25 @@ char* read_token(char *p, char *out, int out_size)
         p++;
     }
 
+    /* Accept fd3/bk3 as fd 3/bk 3. Return the command now and leave
+     * its count for the next token read, including inside command bodies.
+     * Only split a complete numeric suffix, not names such as fd3abc.
+     */
+    if (out_size >= 3 &&
+        (strncmp(p, "fd", 2) == 0 || strncmp(p, "bk", 2) == 0) &&
+        isdigit((unsigned char)p[2]))
+    {
+        char *end = p + 2;
+        while (isdigit((unsigned char)*end)) end++;
+        if (*end == ' ' || *end == '\0')
+        {
+            out[0] = p[0];
+            out[1] = p[1];
+            out[2] = '\0';
+            return p + 2;
+        }
+    }
+
     int j = 0;
     while (*p != ' ' && *p != '\0' && j < out_size - 1)
     {
