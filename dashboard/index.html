@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turtle Robot Master Panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="gridView" class="grid-page-container">
+    
+    <!-- LEFT SIDE: Full Grid with Dual Axis Labels -->
+    <div class="grid-section">
+      <div id="gridContainer" class="grid-20x20"></div>
+      <!-- Compass container placed underneath the grid -->
+      <div class="compass-footer">
+        <img src="compass.png" alt="Grid Compass" class="grid-compass-img" />
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: Control Panel Card -->
+    <div class="card control-card">
+      <h2>Grid Navigation</h2>
+      <div id="statusBadge" class="badge status-disconnected">
+        Status: Disconnected
+      </div>
+
+      <!-- Category Tracking Badges with Individual Clear Buttons -->
+      <div class="category-panel">
+        <div class="coord-badge">
+          <span>🚀 Start: <strong id="startDisplay">Not Set</strong></span>
+          <button id="clearStartBtn" class="btn-mini btn-danger">Clear</button>
+        </div>
+
+        <div class="coord-badge" style="background: #f1f5f9; padding: 6px 10px; border-left: 3px solid #3b82f6;">
+          <label for="startDirSelect" style="font-size: 11px; font-weight: bold; color: #334155;">🧭 Facing Direction:</label>
+          <select id="startDirSelect" class="item-select-mini" style="margin-left: auto;">
+            <option value="0">North (Up ⬆️)</option>
+            <option value="90">East (Right ➡️)</option>
+            <option value="180">South (Down ⬇️)</option>
+            <option value="270">West (Left ⬅️)</option>
+          </select>
+        </div>
+
+        <div class="coord-badge">
+          <span>🏁 Destination: <strong id="destDisplay">Not Set</strong></span>
+          <button id="clearDestBtn" class="btn-mini btn-danger">Clear</button>
+        </div>
+
+        <div class="coord-badge">
+          <span>🧱 Obstacles (<span id="obsCount">0</span>): <strong id="obsDisplay">None</strong></span>
+          <button id="clearObsBtn" class="btn-mini btn-danger">Clear</button>
+        </div>
+
+        <div class="coord-badge">
+          <span>🗣️ Vowels (<span id="vowelCount">0</span>): <strong id="vowelDisplay">None</strong></span>
+          <button id="clearVowelBtn" class="btn-mini btn-danger">Clear</button>
+        </div>
+      </div>
+
+      <!-- Item Placement Inputs -->
+      <div class="input-controls">
+        <input type="text" id="coordInput" placeholder="e.g. B14" maxlength="4" />
+        
+        <select id="itemTypeSelect" class="item-select">
+          <option value="start">🚀 Start (Required)</option>
+          <option value="dest">🏁 Destination (Required)</option>
+          <option value="obstacle">🧱 Obstacle (Optional)</option>
+          <option value="A">Letter A (Optional)</option>
+          <option value="E">Letter E (Optional)</option>
+          <option value="I">Letter I (Optional)</option>
+          <option value="O">Letter O (Optional)</option>
+          <option value="U">Letter U (Optional)</option>
+        </select>
+        
+        <button id="placeBtn" class="btn btn-secondary" style="flex: 1;">Place Item</button>
+        <button id="clearAllBtn" class="btn btn-outline-danger">Clear All</button>
+        
+        <button id="pdfBtn" class="btn btn-send" style="margin-top: 15px;" disabled title="Set both Start (🚀) and Destination (🏁) points to unlock PDF export.">Save as PDF</button>
+        <button id="connectBtn" class="btn btn-connect">Connect to Robot</button>
+      </div>
+
+      <div class="control-group" style="margin-top: 15px;">
+        <label for="logoInput">🤖 Logo Code Simulator</label>
+        <textarea id="logoInput" rows="3" placeholder="e.g. FD 3 RT 90 FD 2" style="width: 100%; margin-top: 5px; font-family: monospace;"></textarea>
+        
+        <div style="display: flex; gap: 8px; margin-top: 5px;">
+          <button id="runLogoBtn" class="btn btn-secondary">Run Code 🚀</button>
+          <button id="resetTrailBtn" class="btn btn-outline-danger">Clear Trail</button>
+        </div>
+
+        <!-- Persistent Grade Badge & Button (Initially Hidden) -->
+        <div id="gradeSummaryBanner" style="display: none; margin-top: 10px; padding: 10px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; justify-content: space-between; align-items: center;">
+          <div>
+            <span style="font-size: 12px; color: #64748b; font-weight: bold;">LAST RUN GRADE:</span>
+            <span id="bannerGradeText" style="font-weight: bold; font-size: 14px; margin-left: 5px;">100% (PASS)</span>
+          </div>
+          <button id="viewGradeBtn" class="btn-mini btn-secondary">View Grade 📊</button>
+        </div>
+
+        <!-- Evaluation Results Modal Overlay -->
+        <div id="gradeModal" class="modal-overlay" style="display: none;">
+          <div class="modal-card">
+            <div class="modal-header">
+              <h3 id="modalTitle">🎓 Mission Report</h3>
+              <button id="closeModalBtn" class="modal-close-x">&times;</button>
+            </div>
+            
+            <div id="modalBody" class="modal-body">
+              <!-- Dynamic evaluation breakdown inserted via JS -->
+            </div>
+
+            <div class="modal-footer">
+              <button id="modalOkBtn" class="btn btn-secondary">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    
+    <!-- PRINT ONLY SUMMARY SECTION (Visible only in PDF / Print preview) -->
+    <div id="printSummary" class="print-only-summary">
+      <h2>🎓 Mission Performance Report</h2>
+      
+      <div class="print-section">
+        <h3>🤖 Executed Logo Code</h3>
+        <pre id="printLogoCode">No code executed yet.</pre>
+      </div>
+
+      <div class="print-section">
+        <h3>📊 Evaluation Breakdown</h3>
+        <div id="printGradeBody">No evaluation data available.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NOTICE: type="module" allows ES6 imports in main.js -->
+  <script type="module" src="main.js?v=1.0.9"></script>
+</body>
+</html>
