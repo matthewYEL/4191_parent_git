@@ -126,6 +126,14 @@ select {
   transition: background-color 0.15s ease-in-out;
 }
 
+/* Selected target cell outline and glow effect */
+.grid-cell.cell-selected {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: -3px;
+  background-color: #eff6ff !important;
+  box-shadow: inset 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
 .grid-cell.target {
   background-color: #007bff;
   color: white;
@@ -254,10 +262,14 @@ select {
 }
 
 /* Directional rotations (Default emoji turtle faces LEFT / 270°) */
-.turtle-facing-up    { transform: rotate(90deg) scale(1.2); }
-.turtle-facing-right { transform: rotate(180deg) scale(1.2); }
-.turtle-facing-down  { transform: rotate(270deg) scale(1.2); }
-.turtle-facing-left  { transform: rotate(0deg) scale(1.2); }
+.turtle-facing-0   { transform: rotate(0deg);   display: inline-block; }
+.turtle-facing-45  { transform: rotate(45deg);  display: inline-block; }
+.turtle-facing-90  { transform: rotate(90deg);  display: inline-block; }
+.turtle-facing-135 { transform: rotate(135deg); display: inline-block; }
+.turtle-facing-180 { transform: rotate(180deg); display: inline-block; }
+.turtle-facing-225 { transform: rotate(225deg); display: inline-block; }
+.turtle-facing-270 { transform: rotate(270deg); display: inline-block; }
+.turtle-facing-315 { transform: rotate(315deg); display: inline-block; }
 
 /* Compass Image */
 .grid-section {

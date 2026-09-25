@@ -10,6 +10,7 @@ let startCoord = null;
 let destCoord = null;
 let hoveredCellKey = null;
 let container = null;
+let selectedCellKey = null; // Tracks currently clicked/selected grid cell
 
 // DOM Element References
 let coordInput, itemSelect, placeBtn, clearAllBtn, pdfBtn;
@@ -69,6 +70,7 @@ export function initGrid() {
 
       cell.addEventListener('click', () => {
         if (coordInput) coordInput.value = `${col}${r}`;
+        selectCell(`${col}${r}`);
       });
 
       cell.addEventListener('mouseenter', () => {
@@ -101,6 +103,12 @@ export function initGrid() {
   if (coordInput) {
     coordInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') parseAndPlace();
+    });
+    coordInput.addEventListener('input', (e) => {
+      const val = e.target.value.trim().toUpperCase();
+      if (val.match(/^([A-T])([1-9]|1[0-9]|20)$/)) {
+        selectCell(val);
+      }
     });
   }
 
@@ -198,11 +206,17 @@ async function moveRobotForward(steps, runTracker) {
     let nextCol = robotState.colIdx;
     let nextRow = robotState.rowIdx;
 
-    // 1. Calculate prospective cell without mutating state prematurely
-    if (robotState.heading === 0) nextRow -= dir;       // UP
-    else if (robotState.heading === 90) nextCol += dir;  // RIGHT
-    else if (robotState.heading === 180) nextRow += dir; // DOWN
-    else if (robotState.heading === 270) nextCol -= dir; // LEFT
+    const normHeading = ((robotState.heading % 360) + 360) % 360;
+    switch (normHeading) {
+      case 0:   nextRow -= dir; break;                  // North
+      case 45:  nextRow -= dir; nextCol += dir; break;  // North-East ↗️
+      case 90:  nextCol += dir; break;                  // East
+      case 135: nextRow += dir; nextCol += dir; break;  // South-East ↘️
+      case 180: nextRow += dir; break;                  // South
+      case 225: nextRow += dir; nextCol -= dir; break;  // South-West ↙️
+      case 270: nextCol -= dir; break;                  // West
+      case 315: nextRow -= dir; nextCol -= dir; break;  // North-West ↖️
+    }
 
     // 2. BORDER CRASH CHECK (Grid range 0 to 19)
     if (nextCol < 0 || nextCol > 19 || nextRow < 0 || nextRow > 19) {
@@ -263,6 +277,9 @@ function highlightCurrentRobotCell(colIdx, rowIdx) {
   if (cell) {
     cell.classList.add('robot-current');
     cell.classList.add('path-trail');
+
+    const normHeading = ((robotState.heading % 360) + 360) % 360;
+    cell.innerHTML = `<span class="turtle-icon turtle-facing-${normHeading}">🐢</span>`;
 
     // 3. Map heading angle to compass facing class
     // Default 🐢 faces LEFT (270°)
@@ -370,6 +387,22 @@ function clearCategory(category) {
   updateUI();
 }
 
+function selectCell(key) {
+  // Clear previous selection highlight
+  if (selectedCellKey) {
+    const prevCell = container.querySelector(`[data-col="${selectedCellKey[0]}"][data-row="${selectedCellKey.slice(1)}"]`);
+    if (prevCell) prevCell.classList.remove('cell-selected');
+  }
+
+  selectedCellKey = key;
+
+  // Add blue highlight to newly selected cell
+  const newCell = container.querySelector(`[data-col="${key[0]}"][data-row="${key.slice(1)}"]`);
+  if (newCell) {
+    newCell.classList.add('cell-selected');
+  }
+}
+
 function removeCoordinate(key) {
   if (!boardState[key]) return;
 
@@ -408,9 +441,13 @@ function updateUI() {
   if (destDisplay) destDisplay.innerText = destCoord || 'Not Set';
 
   if (startDisplay && startCoord) {
-    const dirMap = { 0: 'N ⬆️', 90: 'E ➡️', 180: 'S ⬇️', 270: 'W ⬅️' };
-    startDisplay.innerText = `${startCoord} (${dirMap[startDir]})`;
-  }
+  const dirMap = { 
+    0: '0° ⬆️', 45: '45° ↗️', 90: '90° ➡️', 135: '135° ↘️',
+    180: '180° ⬇️', 225: '225° ↙️', 270: '270° ⬅️', 315: '315° ↖️' 
+  };
+  const normDir = ((startDir % 360) + 360) % 360;
+  startDisplay.innerText = `${startCoord} (${dirMap[normDir] || normDir + '°'})`;
+}
 
   // 2. Aggregate Obstacles
   const obstacles = Object.keys(boardState).filter(k => boardState[k].type === 'obstacle');
