@@ -250,6 +250,10 @@
   </Group>
   <Data key="DataVersionKey" value="2" />
   <Group key="DWRInstGuidMapping">
+    <Group key="Interrupt">
+      <Data key="01efc32a-9dec-4ecf-8d4e-c23a5f2a5d17" value="isr_2" />
+      <Data key="9f0736b0-ad8b-4181-9999-c6aec4bef922" value="isr_1" />
+    </Group>
     <Group key="Pin">
       <Data key="3da2bc32-22c2-4dae-85db-071d7cca2553" value="Motor_1_Phase_B" />
       <Data key="4a7f08af-d8e7-4a2c-a8ed-8aa781e5e1e0" value="Rx_2" />
@@ -3349,6 +3353,22 @@
       </Group>
       <Group key="1024">
         <Data key="LevelKey" value="00" />
+      </Group>
+    </Group>
+  </Group>
+  <Group key="Interrupt">
+    <Group key="01efc32a-9dec-4ecf-8d4e-c23a5f2a5d17">
+      <Group key="CortexM3">
+        <Data key="Assigned" value="True" />
+        <Data key="Priority" value="7" />
+        <Data key="Vector" value="-1" />
+      </Group>
+    </Group>
+    <Group key="9f0736b0-ad8b-4181-9999-c6aec4bef922">
+      <Group key="CortexM3">
+        <Data key="Assigned" value="True" />
+        <Data key="Priority" value="7" />
+        <Data key="Vector" value="-1" />
       </Group>
     </Group>
   </Group>

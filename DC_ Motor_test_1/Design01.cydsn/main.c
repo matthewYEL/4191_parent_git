@@ -69,6 +69,15 @@ TurtleCommand cmd_queue[30];
 volatile int cmd_count = 0;
 volatile int current_cmd_idx = 0;
 
+typedef struct {
+    char var[20];
+    char expected[20];
+    char true_cmd[30];
+    char false_cmd[30];
+} IfelseData;
+
+IfelseData if_data[30];
+
 int angle_to_pulses(int angle)
 {
     angle = abs(angle);
@@ -248,8 +257,8 @@ typedef struct {
 } TurtleVariable;
 
 /* Camera updates :vowel automatically; no initial MAKE is required. */
-TurtleVariable variables[10] = {{"vowel", "blank"}};
-int variable_count = 1;
+TurtleVariable variables[10];
+int variable_count = 0;
 
 char while_var_name[20];
 char while_expected_value[20];
@@ -260,6 +269,12 @@ TurtleCommand while_cmd_queue[30];
 int while_cmd_count = 0;
 int while_cmd_idx = 0;
 int executing_while = 0;
+
+#define IF_QUEUE_SIZE 15
+TurtleCommand if_cmd_queue[IF_QUEUE_SIZE];
+int if_cmd_count = 0;
+int if_cmd_idx = 0;
+int executing_if = 0;
 
 /*
  * Actual physical heading in degrees (0 = whatever direction the
@@ -283,9 +298,9 @@ char* get_variable(char *var_name)
         if (strcmp(variables[i].name, var_name) == 0)
         {
             return variables[i].value;
+            
         }
     }
-
     return NULL;
 }
 
@@ -299,12 +314,14 @@ int compare_variable(char *var_name, char *expected_value)
         return 0;
     }
 
-    if (strcmp(actual_value, expected_value) == 0)
+    if (expected_value[0] == ':')
     {
-        return 1;
+        char *other = get_variable(expected_value + 1);
+
+        expected_value = (other != NULL) ? other : (expected_value + 1);
     }
 
-    return 0;
+    return strcmp(actual_value, expected_value) == 0;
 }
 
 void parse_command_string(char *text)
@@ -347,11 +364,11 @@ void parse_repeat_content(char *text)
     }
 }
 
-void parse_branch(char *text)
+void parse_into(char *text, TurtleCommand *queue, int *count, int max_count)
 {
     char *p = text;
 
-    while (*p != '\0' && cmd_count < 30)
+    while (*p != '\0' && *count < max_count)
     {
         while (*p == ' ')
         {
@@ -363,9 +380,6 @@ void parse_branch(char *text)
             break;
         }
 
-        /* =========================
-           repeat
-           ========================= */
         if (strncmp(p, "repeat", 6) == 0)
         {
             p += 6;
@@ -395,7 +409,6 @@ void parse_branch(char *text)
                 if (repeat_end != NULL)
                 {
                     char repeat_content[50];
-
                     int len = repeat_end - (repeat_start + 1);
 
                     if (len >= sizeof(repeat_content))
@@ -403,19 +416,14 @@ void parse_branch(char *text)
                         len = sizeof(repeat_content) - 1;
                     }
 
-                    strncpy(repeat_content,
-                            repeat_start + 1,
-                            len);
-
+                    strncpy(repeat_content, repeat_start + 1, len);
                     repeat_content[len] = '\0';
 
                     for (int r = 0; r < rep_count; r++)
                     {
                         char temp_str[50];
-
                         strcpy(temp_str, repeat_content);
-
-                        parse_branch(temp_str);
+                        parse_into(temp_str, queue, count, max_count);
                     }
 
                     p = repeat_end + 1;
@@ -426,10 +434,6 @@ void parse_branch(char *text)
                 }
             }
         }
-
-        /* =========================
-           normal command
-           ========================= */
         else
         {
             char cmd_name[10];
@@ -439,7 +443,7 @@ void parse_branch(char *text)
             p = read_token(p, value_str, sizeof(value_str));
             int value = atoi(value_str);
 
-            append_simple_command(cmd_queue, &cmd_count, 30, cmd_name, value);
+            append_simple_command(queue, count, max_count, cmd_name, value);
         }
     }
 }
@@ -472,19 +476,7 @@ char* find_matching_bracket(char *start)
 
 int while_condition_true(void)
 {
-    char *actual_value = get_variable(while_var_name);
-
-    if (actual_value == NULL)
-    {
-        return 0;
-    }
-
-    if (strcmp(actual_value, while_expected_value) == 0)
-    {
-        return 1;
-    }
-
-    return 0;
+    return compare_variable(while_var_name, while_expected_value);
 }
 
 /*
@@ -498,11 +490,9 @@ void advance_command_index(int heading_delta_deg)
 {
     begin_camera_scan();
 
-    /* Keep the original command intact so REPEAT/WHILE can execute it again.
-     * Each completed f/b segment is one grid, including diagonal headings.
-     */
-    TurtleCommand *finished = executing_while
-        ? &while_cmd_queue[while_cmd_idx] : &cmd_queue[current_cmd_idx];
+    TurtleCommand *finished = executing_if    ? &if_cmd_queue[if_cmd_idx]
+                              : executing_while ? &while_cmd_queue[while_cmd_idx]
+                                                 : &cmd_queue[current_cmd_idx];
     if (finished->type == 'f' || finished->type == 'b')
     {
         movement_steps_done++;
@@ -515,27 +505,34 @@ void advance_command_index(int heading_delta_deg)
     movement_steps_done = 0;
 
     current_heading_deg += (float)heading_delta_deg;
+    while (current_heading_deg < 0.0f)   current_heading_deg += 360.0f;
+    while (current_heading_deg >= 360.0f) current_heading_deg -= 360.0f;
 
-    while (current_heading_deg < 0.0f)
+    if (executing_if)
     {
-        current_heading_deg += 360.0f;
+        if_cmd_idx++;
+        if (if_cmd_idx >= if_cmd_count)
+        {
+            executing_if = 0;
+            current_cmd_idx++;
+            if (current_cmd_idx >= cmd_count) 
+            {
+                current_cmd_idx = 0;
+                cmd_count = 0;
+            }
+        }
     }
-    while (current_heading_deg >= 360.0f)
-    {
-        current_heading_deg -= 360.0f;
-    }
-
-    if (executing_while)
+    else if (executing_while)
     {
         while_cmd_idx++;
     }
     else
     {
         current_cmd_idx++;
-
-        if (current_cmd_idx >= cmd_count)
+        if (current_cmd_idx >= cmd_count) 
         {
             cmd_count = 0;
+            current_cmd_idx = 0;
         }
     }
 
@@ -613,7 +610,16 @@ CY_ISR(ISR_Handler_1)
             if (camera_state != CAMERA_READY || waiting_for_uart ||
                 executing_while || current_cmd_idx < cmd_count)
             {
-                UART_1_PutString("BUSY: moving/scanning; retry command when stopped\r\n");
+                uart_printf("BUSY: cam=%d(%s) wait=%d while=%d idx=%d cnt=%d ms=%lu\r\n",
+                camera_state,
+                camera_state == CAMERA_SETTLING    ? "SETTLING"  :
+                camera_state == CAMERA_WAIT_RESULT ? "WAIT_RESULT" :
+                camera_state == CAMERA_READY       ? "READY"     : "MOVING",
+                waiting_for_uart, executing_while,
+                current_cmd_idx, cmd_count,
+                (unsigned long)camera_ms);
+
+                //UART_1_PutString("BUSY: moving/scanning; retry command when stopped\r\n");
                 rx_index = 0;
                 return;
             }
@@ -830,7 +836,7 @@ CY_ISR(ISR_Handler_1)
                 /* =========================
                    IFELSE COMMAND
                    ========================= */
-                else if (strncmp(p, "ifelse", 6) == 0)
+                                else if (strncmp(p, "ifelse", 6) == 0)
                 {
                     p += 6;
 
@@ -838,11 +844,6 @@ CY_ISR(ISR_Handler_1)
                     {
                         p++;
                     }
-
-                    /* =========================
-                       Read variable name
-                       Example: :vowel
-                       ========================= */
 
                     if (*p == ':')
                     {
@@ -859,15 +860,10 @@ CY_ISR(ISR_Handler_1)
 
                         var_name[j] = '\0';
 
-                        /* Skip spaces */
                         while (*p == ' ')
                         {
                             p++;
                         }
-
-                        /* =========================
-                           Read =
-                           ========================= */
 
                         if (*p == '=')
                         {
@@ -878,11 +874,6 @@ CY_ISR(ISR_Handler_1)
                         {
                             p++;
                         }
-
-                        /* =========================
-                           Read expected value
-                           Example: "a
-                           ========================= */
 
                         if (*p == '"')
                         {
@@ -900,15 +891,6 @@ CY_ISR(ISR_Handler_1)
 
                         expected_value[j] = '\0';
 
-                        /* =========================
-                           Compare
-                           ========================= */
-
-                        int condition = compare_variable(var_name, expected_value);
-
-                        uart_printf("IFELSE: %s == %s ? %d\r\n",
-                                    var_name, expected_value, condition);
-                        
                         /* Skip spaces */
                         while (*p == ' ')
                         {
@@ -958,15 +940,22 @@ CY_ISR(ISR_Handler_1)
 
                                         p = false_end + 1;
 
-                                        if (condition)
+                                        if (cmd_count < 30)
                                         {
-                                            UART_1_PutString("IF TRUE\r\n");
-                                            parse_branch(true_cmd);
-                                        }
-                                        else
-                                        {
-                                            UART_1_PutString("IF FALSE\r\n");
-                                            parse_branch(false_cmd);
+                                            cmd_queue[cmd_count].type = 'i';
+                                            cmd_queue[cmd_count].param = 0;
+                                            cmd_queue[cmd_count].repeat_cnt = 1;
+                                            cmd_queue[cmd_count].turn_delta_deg = 0;
+
+                                            strcpy(if_data[cmd_count].var, var_name);
+                                            strcpy(if_data[cmd_count].expected, expected_value);
+                                            strcpy(if_data[cmd_count].true_cmd, true_cmd);
+                                            strcpy(if_data[cmd_count].false_cmd, false_cmd);
+
+                                            uart_printf("IFELSE QUEUED: %s = %s [%s] [%s]\r\n",
+                                                        var_name, expected_value, true_cmd, false_cmd);
+
+                                            cmd_count++;
                                         }
                                     }
                                 }
@@ -1121,8 +1110,10 @@ CY_ISR(ISR_Handler_1)
                     append_simple_command(cmd_queue, &cmd_count, 30, cmd_name, target_val);
                 }
             }
-            if (!is_make_command && cmd_count > 0)
+            if (cmd_count > 0)
             {
+                
+                uart_printf("ACCEPTED: cam=%d ms=%lu\r\n", camera_state, (unsigned long)camera_ms);
                 uart_printf("DEBUG: count=%d\r\n", cmd_count);
 
                 for (int j = 0; j < cmd_count; j++)
@@ -1164,6 +1155,7 @@ static void begin_camera_scan(void)
 static void update_camera_vowel(uint8 camera_rx)
 {
     uint8 interrupt_state = CyEnterCriticalSection();
+
     char *value = get_variable("vowel");
 
     if (value != NULL)
@@ -1177,11 +1169,12 @@ static void update_camera_vowel(uint8 camera_rx)
             value[0] = (char)(camera_rx - 'A' + 'a');
             value[1] = '\0';
         }
-
-        /* Wake the existing WHILE wait, including repeated detections. */
-        uart_msg_received = 1;
-        camera_state = CAMERA_READY;
     }
+    
+
+    uart_msg_received = 1;
+    camera_state = CAMERA_READY;
+
     CyExitCriticalSection(interrupt_state);
 }
 
@@ -1197,6 +1190,11 @@ static void check_camera_uart(void)
     static uint8 last_reported = 0u;
     uint8 report_result;
     char camera_message[] = "CAMERA DETECTED: A\r\n";
+    if (camera_state == CAMERA_READY)
+    {
+        UART_2_ClearRxBuffer();
+        return;
+    }
 
     if (camera_state == CAMERA_MOVING || camera_state == CAMERA_SETTLING)
     {
@@ -1208,17 +1206,29 @@ static void check_camera_uart(void)
         }
         return;
     }
+    
+    if (camera_state == CAMERA_WAIT_RESULT &&
+    (uint32)(camera_ms - camera_stop_ms) >= CAMERA_SETTLE_MS + 2000u)
+    {
+        uint8 s = CyEnterCriticalSection();
+        char *v = get_variable("vowel");
+        if (v != NULL) strcpy(v, "NONE");
+        uart_msg_received = 1;
+        camera_state = CAMERA_READY;
+        CyExitCriticalSection(s);
+        UART_1_PutString("CAMERA TIMEOUT -> vowel=NONE\r\n");
+    }
 
     /* Bound service time even if the camera transmits continuously. */
     if (UART_2_GetRxBufferSize() > 0u)
     {
         camera_rx = UART_2_GetChar();
+        //uart_printf("CAM RX: 0x%02X state=%d\r\n", camera_rx, camera_state);
         if (camera_rx >= 'a' && camera_rx <= 'z')
         {
             camera_rx = (uint8)(camera_rx - 'a' + 'A');
         }
         report_result = (camera_state == CAMERA_WAIT_RESULT || camera_rx != last_reported);
-
         switch (camera_rx)
         {
             case 'A':
@@ -1230,12 +1240,16 @@ static void check_camera_uart(void)
                 camera_message[sizeof("CAMERA DETECTED: ") - 1u] = (char)camera_rx;
                 if (report_result) UART_2_PutString(camera_message);
                 last_reported = camera_rx;
+                char *v_now = get_variable("vowel");
+                uart_printf("VOWEL NOW: %s\r\n", v_now != NULL ? v_now : "(not made yet)");
                 break;
 
             case 'N':
                 update_camera_vowel(camera_rx);
                 if (report_result) UART_2_PutString("NO VOWELS DETECTED\r\n");
                 last_reported = camera_rx;
+                char *none_now = get_variable("vowel");
+                uart_printf("VOWEL NOW: %s\r\n", none_now != NULL ? none_now : "(not made yet)");
                 break;
 
             default:
@@ -1280,10 +1294,9 @@ int main(void)
     uint32 last_motor_update_ms = camera_ms;
     
     for(;;)
-    { 
+    {  
         /* Place your application code here. */
         check_camera_uart();
-
         if (camera_state == CAMERA_SETTLING || camera_state == CAMERA_WAIT_RESULT)
         {
             /* Motors are already stopped; keep servicing UART while waiting.
@@ -1291,7 +1304,6 @@ int main(void)
              */
             continue;
         }
-
         if (waiting_for_uart)
         {
             if (!uart_msg_received)
@@ -1315,6 +1327,11 @@ int main(void)
                 UART_1_PutString("WHILE END\r\n");
 
                 current_cmd_idx++;
+                if (current_cmd_idx >= cmd_count)
+                {
+                    current_cmd_idx = 0;
+                    cmd_count = 0;
+                }
                 request_reset_start = 1;
 
                 uart_printf("AFTER WHILE: idx=%d count=%d\r\n",
@@ -1384,7 +1401,11 @@ int main(void)
 
         TurtleCommand *current_cmd;
 
-        if (executing_while)
+        if (executing_if)
+        {
+            current_cmd = &if_cmd_queue[if_cmd_idx];
+        }
+        else if (executing_while)
         {
             current_cmd = &while_cmd_queue[while_cmd_idx];
         }
@@ -1406,8 +1427,60 @@ int main(void)
 
         switch (current_cmd->type)
         {
+            case 'i': //ifelse
+            {
+                static int if_scanned = 0;
+
+                if (!if_scanned)
+                {
+                    if_scanned = 1;
+                    begin_camera_scan();
+                    break;
+                }
+                if_scanned = 0;
+
+                IfelseData *d = &if_data[current_cmd_idx];
+
+                int condition = compare_variable(d->var, d->expected);
+
+                uart_printf("IFELSE: %s == %s ? %d\r\n", d->var, d->expected, condition);
+                UART_1_PutString(condition ? "IF TRUE\r\n" : "IF FALSE\r\n");
+
+                char *chosen = condition ? d->true_cmd : d->false_cmd;
+
+                if_cmd_count = 0;
+                parse_into(chosen, if_cmd_queue, &if_cmd_count, IF_QUEUE_SIZE);
+
+                if (if_cmd_count > 0)
+                {
+                    executing_if = 1;
+                    if_cmd_idx = 0;
+                    request_reset_start = 1;
+                }
+                else
+                {
+                    current_cmd_idx++;
+                    if (current_cmd_idx >= cmd_count) 
+                    {
+                        current_cmd_idx = 0;
+                        cmd_count = 0;
+                    }
+                    request_reset_start = 1;
+                }
+            }
+            break;
             case 'w': //while
             {
+                static int w_scanned = 0;
+
+                if (!w_scanned)
+                {
+                    w_scanned = 1;
+                    begin_camera_scan();
+                    break;
+                }
+                w_scanned = 0;
+
                 if (while_condition_true())
                 {
                     UART_1_PutString("WHILE TRUE\r\n");
@@ -1419,12 +1492,18 @@ int main(void)
                 else
                 {
                     UART_1_PutString("WHILE FALSE\r\n");
-                    
+
                     executing_while = 0;
 
                     current_cmd_idx++;
+                    if (current_cmd_idx >= cmd_count)
+                    {
+                        current_cmd_idx = 0;
+                        cmd_count = 0;
+                    }
                 }
             }
+            break;
             break;
             case 'f'://forward
             {
