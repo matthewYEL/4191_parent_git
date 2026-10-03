@@ -1,5 +1,5 @@
 # Design01
-# 2026-09-30 05:15:02Z
+# 2026-10-01 01:17:43Z
 
 # IO_0@[IOP=(1)][IoId=(0)] is reserved: SWDDebugEnabled
 dont_use_io iocell 1 0
@@ -22,132 +22,165 @@ set_io "Motor_2_Phase_A(0)" iocell 2 3
 set_io "Motor_2_Phase_B(0)" iocell 2 4
 set_io "Rx_2(0)" iocell 15 5
 set_io "Tx_2(0)" iocell 12 7
-set_location "\QuadDec_1:Cnt16:CounterUDB:reload\" 3 0 0 2
-set_location "\QuadDec_1:Cnt16:CounterUDB:status_0\" 3 1 0 2
-set_location "\QuadDec_1:Cnt16:CounterUDB:status_2\" 3 0 0 3
-set_location "\QuadDec_1:Cnt16:CounterUDB:status_3\" 3 1 0 1
-set_location "\QuadDec_1:Cnt16:CounterUDB:count_enable\" 2 1 1 2
-set_location "\QuadDec_1:Net_530\" 3 2 1 0
-set_location "\QuadDec_1:Net_611\" 3 2 1 1
-set_location "Net_49" 0 1 0 3
-set_location "\UART_1:BUART:counter_load_not\" 1 1 0 1
-set_location "\UART_1:BUART:tx_status_0\" 1 1 0 2
-set_location "\UART_1:BUART:tx_status_2\" 1 0 0 3
-set_location "\UART_1:BUART:rx_counter_load\" 0 3 0 1
-set_location "\UART_1:BUART:rx_postpoll\" 0 4 1 1
-set_location "\UART_1:BUART:rx_status_4\" 0 5 1 2
-set_location "\UART_1:BUART:rx_status_5\" 0 5 0 0
-set_location "\QuadDec_2:Cnt16:CounterUDB:reload\" 0 0 1 0
-set_location "\QuadDec_2:Cnt16:CounterUDB:status_0\" 0 1 0 0
-set_location "\QuadDec_2:Cnt16:CounterUDB:status_2\" 0 0 1 3
-set_location "\QuadDec_2:Cnt16:CounterUDB:status_3\" 0 2 1 1
-set_location "\QuadDec_2:Cnt16:CounterUDB:count_enable\" 0 2 1 2
-set_location "\QuadDec_2:Net_530\" 0 1 1 0
-set_location "\QuadDec_2:Net_611\" 0 1 1 1
-set_location "Net_144" 1 1 1 3
-set_location "\UART_2:BUART:counter_load_not\" 1 2 1 2
-set_location "\UART_2:BUART:tx_status_0\" 1 3 0 3
-set_location "\UART_2:BUART:tx_status_2\" 1 5 1 0
-set_location "\UART_2:BUART:rx_counter_load\" 1 5 0 3
-set_location "\UART_2:BUART:rx_postpoll\" 1 3 1 1
+set_io "Rx_3(0)" iocell 3 0
+set_io "Tx_3(0)" iocell 3 1
+set_location "\QuadDec_1:Cnt16:CounterUDB:reload\" 1 1 1 1
+set_location "\QuadDec_1:Cnt16:CounterUDB:status_0\" 0 3 0 2
+set_location "\QuadDec_1:Cnt16:CounterUDB:status_2\" 1 1 0 0
+set_location "\QuadDec_1:Cnt16:CounterUDB:status_3\" 1 1 1 2
+set_location "\QuadDec_1:Cnt16:CounterUDB:count_enable\" 0 0 1 0
+set_location "\QuadDec_1:Net_530\" 1 2 0 3
+set_location "\QuadDec_1:Net_611\" 1 2 0 0
+set_location "Net_49" 3 4 1 1
+set_location "\UART_1:BUART:counter_load_not\" 3 4 0 0
+set_location "\UART_1:BUART:tx_status_0\" 3 2 0 2
+set_location "\UART_1:BUART:tx_status_2\" 3 4 1 2
+set_location "\UART_1:BUART:rx_counter_load\" 0 5 1 1
+set_location "\UART_1:BUART:rx_postpoll\" 0 3 0 1
+set_location "\UART_1:BUART:rx_status_4\" 0 2 1 2
+set_location "\UART_1:BUART:rx_status_5\" 0 2 0 2
+set_location "\QuadDec_2:Cnt16:CounterUDB:reload\" 1 4 0 0
+set_location "\QuadDec_2:Cnt16:CounterUDB:status_0\" 0 4 1 1
+set_location "\QuadDec_2:Cnt16:CounterUDB:status_2\" 0 2 0 3
+set_location "\QuadDec_2:Cnt16:CounterUDB:status_3\" 1 4 1 0
+set_location "\QuadDec_2:Cnt16:CounterUDB:count_enable\" 1 5 0 0
+set_location "\QuadDec_2:Net_530\" 1 4 0 2
+set_location "\QuadDec_2:Net_611\" 1 4 0 3
+set_location "Net_144" 2 2 0 2
+set_location "\UART_2:BUART:counter_load_not\" 1 1 0 2
+set_location "\UART_2:BUART:tx_status_0\" 2 2 1 0
+set_location "\UART_2:BUART:tx_status_2\" 2 4 0 2
+set_location "\UART_2:BUART:rx_counter_load\" 3 3 1 1
+set_location "\UART_2:BUART:rx_postpoll\" 1 3 1 2
 set_location "\UART_2:BUART:rx_status_4\" 1 2 0 2
-set_location "\UART_2:BUART:rx_status_5\" 1 3 0 2
+set_location "\UART_2:BUART:rx_status_5\" 2 4 1 2
+set_location "Net_171" 3 1 0 3
+set_location "\UART_3:BUART:counter_load_not\" 3 2 0 1
+set_location "\UART_3:BUART:tx_status_0\" 3 1 0 2
+set_location "\UART_3:BUART:tx_status_2\" 3 2 1 3
+set_location "\UART_3:BUART:rx_counter_load\" 2 0 1 1
+set_location "\UART_3:BUART:rx_postpoll\" 3 0 1 2
+set_location "\UART_3:BUART:rx_status_4\" 1 1 0 1
+set_location "\UART_3:BUART:rx_status_5\" 2 1 1 2
 set_location "\PWM_1:PWMHW\" timercell -1 -1 0
-set_location "__ONE__" 2 5 1 1
-set_location "\QuadDec_1:Cnt16:CounterUDB:sCTRLReg:ctrlreg\" 2 2 6
-set_location "\QuadDec_1:Cnt16:CounterUDB:sSTSReg:stsreg\" 3 1 4
-set_location "\QuadDec_1:Cnt16:CounterUDB:sC16:counterdp:u0\" 2 0 2
-set_location "\QuadDec_1:Cnt16:CounterUDB:sC16:counterdp:u1\" 3 0 2
-set_location "\QuadDec_1:bQuadDec:quad_A_delayed_0\" 1 1 1 0
-set_location "\QuadDec_1:bQuadDec:quad_A_delayed_1\" 2 1 0 3
-set_location "\QuadDec_1:bQuadDec:quad_A_delayed_2\" 2 1 0 2
-set_location "\QuadDec_1:bQuadDec:quad_B_delayed_0\" 0 1 1 3
-set_location "\QuadDec_1:bQuadDec:quad_B_delayed_1\" 0 2 0 3
-set_location "\QuadDec_1:bQuadDec:quad_B_delayed_2\" 0 2 0 2
-set_location "\QuadDec_1:bQuadDec:Stsreg\" 3 2 4
-set_location "\UART_1:BUART:sTX:TxShifter:u0\" 1 0 2
-set_location "\UART_1:BUART:sTX:sCLOCK:TxBitClkGen\" 2 2 2
-set_location "\UART_1:BUART:sTX:TxSts\" 1 0 4
-set_location "\UART_1:BUART:sRX:RxShifter:u0\" 0 4 2
-set_location "\UART_1:BUART:sRX:RxBitCounter\" 0 5 7
-set_location "\UART_1:BUART:sRX:RxSts\" 1 5 4
+set_location "__ONE__" 2 3 1 1
+set_location "\QuadDec_1:Cnt16:CounterUDB:sCTRLReg:ctrlreg\" 0 0 6
+set_location "\QuadDec_1:Cnt16:CounterUDB:sSTSReg:stsreg\" 1 3 4
+set_location "\QuadDec_1:Cnt16:CounterUDB:sC16:counterdp:u0\" 0 0 2
+set_location "\QuadDec_1:Cnt16:CounterUDB:sC16:counterdp:u1\" 1 0 2
+set_location "\QuadDec_1:bQuadDec:quad_A_delayed_0\" 0 0 0 3
+set_location "\QuadDec_1:bQuadDec:quad_A_delayed_1\" 0 0 1 3
+set_location "\QuadDec_1:bQuadDec:quad_A_delayed_2\" 0 0 0 1
+set_location "\QuadDec_1:bQuadDec:quad_B_delayed_0\" 0 2 0 0
+set_location "\QuadDec_1:bQuadDec:quad_B_delayed_1\" 0 1 1 2
+set_location "\QuadDec_1:bQuadDec:quad_B_delayed_2\" 0 1 1 1
+set_location "\QuadDec_1:bQuadDec:Stsreg\" 0 1 4
+set_location "\UART_1:BUART:sTX:TxShifter:u0\" 3 4 2
+set_location "\UART_1:BUART:sTX:sCLOCK:TxBitClkGen\" 3 3 2
+set_location "\UART_1:BUART:sTX:TxSts\" 3 4 4
+set_location "\UART_1:BUART:sRX:RxShifter:u0\" 0 2 2
+set_location "\UART_1:BUART:sRX:RxBitCounter\" 0 4 7
+set_location "\UART_1:BUART:sRX:RxSts\" 0 3 4
 set_location "\PWM_2:PWMHW\" timercell -1 -1 1
-set_location "\QuadDec_2:Cnt16:CounterUDB:sCTRLReg:ctrlreg\" 0 2 6
-set_location "\QuadDec_2:Cnt16:CounterUDB:sSTSReg:stsreg\" 0 1 4
-set_location "\QuadDec_2:Cnt16:CounterUDB:sC16:counterdp:u0\" 1 1 2
-set_location "\QuadDec_2:Cnt16:CounterUDB:sC16:counterdp:u1\" 0 1 2
-set_location "\QuadDec_2:bQuadDec:quad_A_delayed_0\" 3 0 1 0
-set_location "\QuadDec_2:bQuadDec:quad_A_delayed_1\" 2 0 0 3
-set_location "\QuadDec_2:bQuadDec:quad_A_delayed_2\" 2 0 0 2
-set_location "\QuadDec_2:bQuadDec:quad_B_delayed_0\" 0 3 1 3
-set_location "\QuadDec_2:bQuadDec:quad_B_delayed_1\" 3 0 1 3
-set_location "\QuadDec_2:bQuadDec:quad_B_delayed_2\" 3 0 1 2
-set_location "\QuadDec_2:bQuadDec:Stsreg\" 0 2 4
+set_location "\QuadDec_2:Cnt16:CounterUDB:sCTRLReg:ctrlreg\" 1 2 6
+set_location "\QuadDec_2:Cnt16:CounterUDB:sSTSReg:stsreg\" 1 4 4
+set_location "\QuadDec_2:Cnt16:CounterUDB:sC16:counterdp:u0\" 1 4 2
+set_location "\QuadDec_2:Cnt16:CounterUDB:sC16:counterdp:u1\" 0 4 2
+set_location "\QuadDec_2:bQuadDec:quad_A_delayed_0\" 2 4 1 0
+set_location "\QuadDec_2:bQuadDec:quad_A_delayed_1\" 1 4 1 3
+set_location "\QuadDec_2:bQuadDec:quad_A_delayed_2\" 1 2 1 2
+set_location "\QuadDec_2:bQuadDec:quad_B_delayed_0\" 0 3 1 0
+set_location "\QuadDec_2:bQuadDec:quad_B_delayed_1\" 1 3 0 3
+set_location "\QuadDec_2:bQuadDec:quad_B_delayed_2\" 1 2 1 3
+set_location "\QuadDec_2:bQuadDec:Stsreg\" 1 5 4
 set_location "isr_1" interrupt -1 -1 0
-set_location "\UART_2:BUART:sTX:TxShifter:u0\" 1 5 2
-set_location "\UART_2:BUART:sTX:sCLOCK:TxBitClkGen\" 1 2 2
-set_location "\UART_2:BUART:sTX:TxSts\" 1 3 4
+set_location "\UART_2:BUART:sTX:TxShifter:u0\" 2 2 2
+set_location "\UART_2:BUART:sTX:sCLOCK:TxBitClkGen\" 2 1 2
+set_location "\UART_2:BUART:sTX:TxSts\" 2 4 4
 set_location "\UART_2:BUART:sRX:RxShifter:u0\" 1 3 2
-set_location "\UART_2:BUART:sRX:RxBitCounter\" 1 4 7
-set_location "\UART_2:BUART:sRX:RxSts\" 1 2 4
+set_location "\UART_2:BUART:sRX:RxBitCounter\" 3 3 7
+set_location "\UART_2:BUART:sRX:RxSts\" 2 2 4
 set_location "isr_2" interrupt -1 -1 1
-set_location "\QuadDec_1:Net_1251\" 3 2 1 2
-set_location "\QuadDec_1:Cnt16:CounterUDB:overflow_reg_i\" 3 0 0 0
-set_location "\QuadDec_1:Cnt16:CounterUDB:underflow_reg_i\" 3 1 0 0
-set_location "\QuadDec_1:Net_1275\" 3 0 0 1
-set_location "\QuadDec_1:Cnt16:CounterUDB:prevCompare\" 3 1 0 3
-set_location "\QuadDec_1:Net_1251_split\" 2 2 1 0
-set_location "\QuadDec_1:Cnt16:CounterUDB:count_stored_i\" 2 1 1 3
-set_location "\QuadDec_1:Net_1203\" 2 1 1 1
-set_location "\QuadDec_1:bQuadDec:quad_A_filt\" 2 1 0 1
-set_location "\QuadDec_1:bQuadDec:quad_B_filt\" 0 2 0 1
-set_location "\QuadDec_1:Net_1260\" 3 1 1 1
-set_location "\QuadDec_1:bQuadDec:error\" 2 1 0 0
-set_location "\QuadDec_1:bQuadDec:state_1\" 3 1 1 0
-set_location "\QuadDec_1:bQuadDec:state_0\" 2 1 1 0
-set_location "\UART_1:BUART:txn\" 2 2 0 0
-set_location "\UART_1:BUART:tx_state_1\" 2 2 0 1
-set_location "\UART_1:BUART:tx_state_0\" 3 2 0 1
-set_location "\UART_1:BUART:tx_state_2\" 3 2 0 0
-set_location "\UART_1:BUART:tx_bitclk\" 1 2 0 1
-set_location "\UART_1:BUART:tx_ctrl_mark_last\" 2 2 1 1
-set_location "\UART_1:BUART:rx_state_0\" 0 3 0 0
-set_location "\UART_1:BUART:rx_load_fifo\" 0 5 1 1
-set_location "\UART_1:BUART:rx_state_3\" 0 3 0 2
+set_location "\UART_3:BUART:sTX:TxShifter:u0\" 3 1 2
+set_location "\UART_3:BUART:sTX:sCLOCK:TxBitClkGen\" 3 2 2
+set_location "\UART_3:BUART:sTX:TxSts\" 3 2 4
+set_location "\UART_3:BUART:sRX:RxShifter:u0\" 2 0 2
+set_location "\UART_3:BUART:sRX:RxBitCounter\" 2 0 7
+set_location "\UART_3:BUART:sRX:RxSts\" 1 1 4
+set_location "isr_3" interrupt -1 -1 2
+set_location "\QuadDec_1:Net_1251\" 1 0 1 1
+set_location "\QuadDec_1:Cnt16:CounterUDB:overflow_reg_i\" 1 1 1 3
+set_location "\QuadDec_1:Cnt16:CounterUDB:underflow_reg_i\" 2 1 1 0
+set_location "\QuadDec_1:Net_1275\" 1 1 1 0
+set_location "\QuadDec_1:Cnt16:CounterUDB:prevCompare\" 0 3 0 0
+set_location "\QuadDec_1:Net_1251_split\" 1 0 0 0
+set_location "\QuadDec_1:Cnt16:CounterUDB:count_stored_i\" 0 0 1 2
+set_location "\QuadDec_1:Net_1203\" 0 1 0 0
+set_location "\QuadDec_1:bQuadDec:quad_A_filt\" 0 0 0 0
+set_location "\QuadDec_1:bQuadDec:quad_B_filt\" 0 1 1 0
+set_location "\QuadDec_1:Net_1260\" 0 0 1 1
+set_location "\QuadDec_1:bQuadDec:error\" 1 0 1 0
+set_location "\QuadDec_1:bQuadDec:state_1\" 0 1 0 3
+set_location "\QuadDec_1:bQuadDec:state_0\" 0 1 1 3
+set_location "\UART_1:BUART:txn\" 3 4 1 0
+set_location "\UART_1:BUART:tx_state_1\" 3 4 0 2
+set_location "\UART_1:BUART:tx_state_0\" 2 4 0 0
+set_location "\UART_1:BUART:tx_state_2\" 3 4 0 1
+set_location "\UART_1:BUART:tx_bitclk\" 2 4 0 1
+set_location "\UART_1:BUART:tx_ctrl_mark_last\" 0 2 1 3
+set_location "\UART_1:BUART:rx_state_0\" 0 5 0 0
+set_location "\UART_1:BUART:rx_load_fifo\" 0 5 0 1
+set_location "\UART_1:BUART:rx_state_3\" 0 5 0 2
 set_location "\UART_1:BUART:rx_state_2\" 0 5 1 0
-set_location "\UART_1:BUART:rx_bitclk_enable\" 1 2 0 3
-set_location "\UART_1:BUART:rx_state_stop1_reg\" 0 5 0 1
-set_location "MODIN1_1" 0 4 1 0
-set_location "MODIN1_0" 0 4 1 2
-set_location "\UART_1:BUART:rx_status_3\" 0 3 0 3
-set_location "\UART_1:BUART:rx_last\" 0 4 1 3
-set_location "\QuadDec_2:Net_1251\" 1 0 0 2
-set_location "\QuadDec_2:Cnt16:CounterUDB:overflow_reg_i\" 0 0 0 1
-set_location "\QuadDec_2:Cnt16:CounterUDB:underflow_reg_i\" 0 2 1 0
-set_location "\QuadDec_2:Net_1275\" 0 0 1 1
-set_location "\QuadDec_2:Cnt16:CounterUDB:prevCompare\" 0 1 0 2
-set_location "\QuadDec_2:Net_1251_split\" 1 0 1 3
-set_location "\QuadDec_2:Cnt16:CounterUDB:count_stored_i\" 0 2 1 3
-set_location "\QuadDec_2:Net_1203\" 0 0 1 2
-set_location "\QuadDec_2:bQuadDec:quad_A_filt\" 2 0 0 1
-set_location "\QuadDec_2:bQuadDec:quad_B_filt\" 3 0 1 1
-set_location "\QuadDec_2:Net_1260\" 0 0 0 2
-set_location "\QuadDec_2:bQuadDec:error\" 2 0 1 0
-set_location "\QuadDec_2:bQuadDec:state_1\" 2 0 1 3
-set_location "\QuadDec_2:bQuadDec:state_0\" 2 0 0 0
-set_location "\UART_2:BUART:txn\" 1 1 0 0
-set_location "\UART_2:BUART:tx_state_1\" 1 2 1 1
-set_location "\UART_2:BUART:tx_state_0\" 1 3 0 1
-set_location "\UART_2:BUART:tx_state_2\" 1 2 1 0
-set_location "\UART_2:BUART:tx_bitclk\" 1 3 0 0
-set_location "\UART_2:BUART:tx_ctrl_mark_last\" 1 5 1 2
-set_location "\UART_2:BUART:rx_state_0\" 1 4 0 0
-set_location "\UART_2:BUART:rx_load_fifo\" 1 4 1 1
-set_location "\UART_2:BUART:rx_state_3\" 1 4 0 2
-set_location "\UART_2:BUART:rx_state_2\" 1 4 1 0
-set_location "\UART_2:BUART:rx_bitclk_enable\" 1 3 1 3
-set_location "\UART_2:BUART:rx_state_stop1_reg\" 1 4 0 3
-set_location "\UART_2:BUART:pollcount_1\" 1 3 1 0
-set_location "\UART_2:BUART:pollcount_0\" 1 3 1 2
-set_location "\UART_2:BUART:rx_status_3\" 1 4 1 2
-set_location "\UART_2:BUART:rx_last\" 1 5 1 1
+set_location "\UART_1:BUART:rx_bitclk_enable\" 0 2 1 0
+set_location "\UART_1:BUART:rx_state_stop1_reg\" 0 5 1 3
+set_location "MODIN1_1" 0 4 0 0
+set_location "MODIN1_0" 0 4 0 3
+set_location "\UART_1:BUART:rx_status_3\" 0 5 0 3
+set_location "\UART_1:BUART:rx_last\" 0 4 0 1
+set_location "\QuadDec_2:Net_1251\" 1 3 0 0
+set_location "\QuadDec_2:Cnt16:CounterUDB:overflow_reg_i\" 0 3 1 3
+set_location "\QuadDec_2:Cnt16:CounterUDB:underflow_reg_i\" 1 4 1 1
+set_location "\QuadDec_2:Net_1275\" 1 4 0 1
+set_location "\QuadDec_2:Cnt16:CounterUDB:prevCompare\" 0 4 1 2
+set_location "\QuadDec_2:Net_1251_split\" 2 3 1 0
+set_location "\QuadDec_2:Cnt16:CounterUDB:count_stored_i\" 1 5 0 1
+set_location "\QuadDec_2:Net_1203\" 1 5 0 2
+set_location "\QuadDec_2:bQuadDec:quad_A_filt\" 1 2 1 1
+set_location "\QuadDec_2:bQuadDec:quad_B_filt\" 1 2 1 0
+set_location "\QuadDec_2:Net_1260\" 1 3 0 1
+set_location "\QuadDec_2:bQuadDec:error\" 1 5 1 1
+set_location "\QuadDec_2:bQuadDec:state_1\" 1 5 1 0
+set_location "\QuadDec_2:bQuadDec:state_0\" 1 5 0 3
+set_location "\UART_2:BUART:txn\" 2 2 0 0
+set_location "\UART_2:BUART:tx_state_1\" 2 0 0 1
+set_location "\UART_2:BUART:tx_state_0\" 2 0 0 2
+set_location "\UART_2:BUART:tx_state_2\" 2 0 0 0
+set_location "\UART_2:BUART:tx_bitclk\" 1 1 0 3
+set_location "\UART_2:BUART:tx_ctrl_mark_last\" 2 2 1 2
+set_location "\UART_2:BUART:rx_state_0\" 2 3 0 0
+set_location "\UART_2:BUART:rx_load_fifo\" 2 3 0 1
+set_location "\UART_2:BUART:rx_state_3\" 3 3 1 3
+set_location "\UART_2:BUART:rx_state_2\" 3 3 1 0
+set_location "\UART_2:BUART:rx_bitclk_enable\" 3 3 0 3
+set_location "\UART_2:BUART:rx_state_stop1_reg\" 2 3 0 2
+set_location "MODIN5_1" 1 3 1 0
+set_location "MODIN5_0" 1 2 0 1
+set_location "\UART_2:BUART:rx_status_3\" 2 3 0 3
+set_location "\UART_2:BUART:rx_last\" 1 3 1 3
+set_location "\UART_3:BUART:txn\" 3 1 1 0
+set_location "\UART_3:BUART:tx_state_1\" 3 1 1 1
+set_location "\UART_3:BUART:tx_state_0\" 3 1 0 0
+set_location "\UART_3:BUART:tx_state_2\" 3 2 0 0
+set_location "\UART_3:BUART:tx_bitclk\" 3 1 0 1
+set_location "\UART_3:BUART:tx_ctrl_mark_last\" 2 1 0 2
+set_location "\UART_3:BUART:rx_state_0\" 2 1 0 0
+set_location "\UART_3:BUART:rx_load_fifo\" 2 0 1 2
+set_location "\UART_3:BUART:rx_state_3\" 2 0 1 3
+set_location "\UART_3:BUART:rx_state_2\" 2 0 1 0
+set_location "\UART_3:BUART:rx_bitclk_enable\" 3 0 0 1
+set_location "\UART_3:BUART:rx_state_stop1_reg\" 2 1 0 1
+set_location "\UART_3:BUART:pollcount_1\" 3 0 0 2
+set_location "\UART_3:BUART:pollcount_0\" 3 0 0 0
+set_location "\UART_3:BUART:rx_status_3\" 2 1 0 3
+set_location "\UART_3:BUART:rx_last\" 3 0 1 1

@@ -257,6 +257,7 @@
     <Group key="Pin">
       <Data key="3da2bc32-22c2-4dae-85db-071d7cca2553" value="Motor_1_Phase_B" />
       <Data key="4a7f08af-d8e7-4a2c-a8ed-8aa781e5e1e0" value="Rx_2" />
+      <Data key="4f2f3fbc-f278-4918-8f21-609001d4ef2e" value="Tx_3" />
       <Data key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba" value="Motor_1_Phase_A" />
       <Data key="9a5e2e60-abdc-40fa-ab83-a2c81735d99e" value="Motor_2_ENB" />
       <Data key="9ba7540f-8991-46a8-ba5e-e5aa5d242c39" value="Motor_1_ENA" />
@@ -269,6 +270,7 @@
       <Data key="1425177d-0d0e-4468-8bcc-e638e5509a9b" value="Rx_1" />
       <Data key="95407278-c97c-452c-9de9-3769049b0214" value="Motor_2_IN_4" />
       <Data key="afa93e40-3c90-4bd5-b16a-9dc114658e57" value="Motor_2_IN_3" />
+      <Data key="cd33a19e-1a15-4da5-9e41-fa5e999e88cf" value="Rx_3" />
       <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="Motor_1_IN_1" />
       <Data key="ed092b9b-d398-4703-be89-cebf998501f6" value="Tx_1" />
     </Group>
@@ -3383,6 +3385,11 @@
         <Data key="Port Format" value="15,5" />
       </Group>
     </Group>
+    <Group key="4f2f3fbc-f278-4918-8f21-609001d4ef2e">
+      <Group key="0">
+        <Data key="Port Format" value="3,1" />
+      </Group>
+    </Group>
     <Group key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba">
       <Group key="0">
         <Data key="Port Format" value="1,6" />
@@ -3441,6 +3448,11 @@
     <Group key="afa93e40-3c90-4bd5-b16a-9dc114658e57">
       <Group key="0">
         <Data key="Port Format" value="2,2" />
+      </Group>
+    </Group>
+    <Group key="cd33a19e-1a15-4da5-9e41-fa5e999e88cf">
+      <Group key="0">
+        <Data key="Port Format" value="3,0" />
       </Group>
     </Group>
     <Group key="e851a3b9-efb8-48be-bbb8-b303b216c393">

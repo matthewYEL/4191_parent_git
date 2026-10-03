@@ -29,7 +29,7 @@ int cmd_code = 0;
 /* Trial interval: mechanical settling plus five camera frames. Tune on hardware.
  * This is not a camera acknowledgement; slow frames may require a longer wait.
  */
-#define CAMERA_SETTLE_MS 600u
+#define CAMERA_SETTLE_MS 100u
 #define MOTOR_CONTROL_PERIOD_MS 100u
 enum { CAMERA_SETTLING, CAMERA_WAIT_RESULT, CAMERA_READY, CAMERA_MOVING };
 static volatile uint8 camera_state = CAMERA_SETTLING;
@@ -119,6 +119,61 @@ int heading_is_diagonal(float heading_deg)
         h += 360;
     }
     return (h % 90) != 0;
+}
+
+/* ---- DFPlayer Mini (via UART_3) ---- */
+#define DF_TRACK_A 1
+#define DF_TRACK_E 2
+#define DF_TRACK_I 3
+#define DF_TRACK_O 4
+#define DF_TRACK_U 5
+
+static void df_send_command(uint8 cmd, uint8 param_hi, uint8 param_lo)
+{
+    uint8 frame[10];
+    uint16 checksum;
+
+    frame[0] = 0x7E;
+    frame[1] = 0xFF;
+    frame[2] = 0x06;
+    frame[3] = cmd;
+    frame[4] = 0x00;  
+    frame[5] = param_hi;
+    frame[6] = param_lo;
+
+    checksum = (uint16)(0 - (frame[1] + frame[2] + frame[3] + frame[4] + frame[5] + frame[6]));
+
+    frame[7] = (uint8)(checksum >> 8);
+    frame[8] = (uint8)(checksum & 0xFF);
+    frame[9] = 0xEF;
+
+    for (int i = 0; i < 10; i++)
+    {
+        UART_3_PutChar(frame[i]);
+    }
+}
+
+static void df_set_volume(uint8 volume /* 0-30 */)
+{
+    df_send_command(0x06, 0x00, volume);
+}
+
+static void df_play_track(uint8 track_num)
+{
+    df_send_command(0x03, 0x00, track_num);
+}
+
+static void play_vowel_sound(char letter)
+{
+    switch (letter)
+    {
+        case 'A': df_play_track(DF_TRACK_A); break;
+        case 'E': df_play_track(DF_TRACK_E); break;
+        case 'I': df_play_track(DF_TRACK_I); break;
+        case 'O': df_play_track(DF_TRACK_O); break;
+        case 'U': df_play_track(DF_TRACK_U); break;
+        default: return;
+    }
 }
 
 /* =========================================================
@@ -599,6 +654,39 @@ CY_ISR(ISR_Handler_1)
             rx_buffer[rx_index] = '\0';
 
             char *p = rx_buffer;
+            
+            /* =========================
+               EMERGENCY STOP
+               (bypasses the BUSY gate on purpose - must work even
+               while moving/scanning/executing while or ifelse)
+               ========================= */
+            if (strncmp(p, "stop", 4) == 0)
+            {
+                stop_motors();
+                df_send_command(0x16, 0x00, 0x00);   /* DFPlayer: stop playback */
+
+                cmd_count = 0;
+                current_cmd_idx = 0;
+
+                while_cmd_count = 0;
+                while_cmd_idx = 0;
+                executing_while = 0;
+
+                if_cmd_count = 0;
+                if_cmd_idx = 0;
+                executing_if = 0;
+
+                waiting_for_uart = 0;
+                uart_msg_received = 0;
+
+                request_reset_start = 0;   /* not moving, nothing to reset a baseline for */
+                camera_state = CAMERA_READY;   /* ready to accept the next command immediately */
+
+                UART_1_PutString("EMERGENCY STOP\r\n");
+
+                rx_index = 0;
+                return;
+            }
 
             /* Check whether this line is MAKE */
             int is_make_command = (strncmp(p, "make", 4) == 0);
@@ -1178,6 +1266,25 @@ static void update_camera_vowel(uint8 camera_rx)
     CyExitCriticalSection(interrupt_state);
 }
 
+/* Print every raw byte waiting in UART_2's buffer, then discard it.
+ * Used anywhere we'd otherwise call UART_2_ClearRxBuffer() silently. */
+static void drain_and_print_camera_bytes(void)
+{
+    while (UART_2_GetRxBufferSize() > 0u)
+    {
+        uint8 b = UART_2_GetChar();
+
+        if (b >= 0x20 && b <= 0x7E)
+        {
+            uart_printf("CAM RAW: 0x%02X '%c'\r\n", b, b);
+        }
+        else
+        {
+            uart_printf("CAM RAW: 0x%02X\r\n", b);
+        }
+    }
+}
+
 /* Camera protocol: one A/E/I/O/U or N byte per detection (either case).
  * Camera TX -> UART_2 RX (P15[5]); UART_2 TX (P12[7]) -> USB-UART RX.
  * Updates :vowel for existing conditions and reports detections to Termite.
@@ -1215,6 +1322,7 @@ static void check_camera_uart(void)
         if (v != NULL) strcpy(v, "NONE");
         uart_msg_received = 1;
         camera_state = CAMERA_READY;
+        camera_stop_ms = camera_ms;
         CyExitCriticalSection(s);
         UART_1_PutString("CAMERA TIMEOUT -> vowel=NONE\r\n");
     }
@@ -1224,6 +1332,7 @@ static void check_camera_uart(void)
     {
         camera_rx = UART_2_GetChar();
         //uart_printf("CAM RX: 0x%02X state=%d\r\n", camera_rx, camera_state);
+        
         if (camera_rx >= 'a' && camera_rx <= 'z')
         {
             camera_rx = (uint8)(camera_rx - 'a' + 'A');
@@ -1238,10 +1347,18 @@ static void check_camera_uart(void)
             case 'U':
                 update_camera_vowel(camera_rx);
                 camera_message[sizeof("CAMERA DETECTED: ") - 1u] = (char)camera_rx;
-                if (report_result) UART_2_PutString(camera_message);
+                if (report_result) 
+                {
+                    UART_2_PutString(camera_message);
+                    //play_vowel_sound(camera_rx);
+                }
                 last_reported = camera_rx;
                 char *v_now = get_variable("vowel");
                 uart_printf("VOWEL NOW: %s\r\n", v_now != NULL ? v_now : "(not made yet)");
+                if (v_now != NULL && report_result)  
+                {
+                    play_vowel_sound(camera_rx);
+                }
                 break;
 
             case 'N':
@@ -1266,12 +1383,15 @@ int main(void)
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
     UART_1_Start();
     UART_2_Start();
+    UART_3_Start();
+    df_set_volume(10);
     UART_2_PutString("UART2 READY\r\n");
     isr_1_StartEx(ISR_Handler_1);
     UART_1_PutString("START...........");
     UART_1_PutString("\n");
     int counter1 = 0;
     int counter2 = 0;
+    //df_play_track(DF_TRACK_A);
 
     // initial setup
     PWM_1_Start();
@@ -1536,8 +1656,8 @@ int main(void)
                 PWM_2_WriteCompare(MASTER_PWM);
                 PWM_1_WriteCompare(pwm_slave);
 
-                uart_printf("M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
-                            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
+                //uart_printf("M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
+                //            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
 
                 if (relative_c2 >= target)
                 {
@@ -1548,6 +1668,7 @@ int main(void)
                 }
                 else
                 {
+                    uart_printf("fd 1");
                     advance_command_index(0);
                 }
             }
@@ -1569,8 +1690,8 @@ int main(void)
                 PWM_2_WriteCompare(MASTER_PWM);
                 PWM_1_WriteCompare(pwm_slave);
 
-                uart_printf("LT M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
-                            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
+                //uart_printf("LT M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
+                //            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
 
                 if (relative_c2 >= target)
                 {
@@ -1581,6 +1702,7 @@ int main(void)
                 }
                 else
                 {
+                    uart_printf("lt");
                     advance_command_index(current_cmd->turn_delta_deg);
                 }
                 break;
@@ -1602,8 +1724,8 @@ int main(void)
                 PWM_2_WriteCompare(MASTER_PWM);
                 PWM_1_WriteCompare(pwm_slave);
 
-                uart_printf("M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
-                            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
+                //uart_printf("M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
+                //            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
 
                 if (relative_c2 <= target)
                 {
@@ -1614,6 +1736,7 @@ int main(void)
                 }
                 else
                 {
+                    uart_printf("bk 1");
                     advance_command_index(0);
                 }
                 break;
@@ -1635,8 +1758,8 @@ int main(void)
                 PWM_2_WriteCompare(MASTER_PWM);
                 PWM_1_WriteCompare(pwm_slave);
 
-                uart_printf("RT M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
-                            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
+                //uart_printf("RT M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
+                //            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
 
                 if (relative_c2 <= target)
                 {
@@ -1647,6 +1770,7 @@ int main(void)
                 }
                 else
                 {
+                    uart_printf("rt");
                     advance_command_index(current_cmd->turn_delta_deg);
                 }
                 break;

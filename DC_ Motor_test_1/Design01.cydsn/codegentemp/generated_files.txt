@@ -78,6 +78,13 @@
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\UART_2_BOOT.c" value="SOURCE_C;CortexM3;;;;UART_2" />
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\isr_2.c" value="SOURCE_C;CortexM3;;;;isr_2" />
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\isr_2.h" value="HEADER;;;;;isr_2" />
+  <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\UART_3.c" value="SOURCE_C;CortexM3;;;;UART_3" />
+  <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\UART_3.h" value="HEADER;;;;;UART_3" />
+  <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\UART_3_PM.c" value="SOURCE_C;CortexM3;;;;UART_3" />
+  <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\UART_3_INT.c" value="SOURCE_C;CortexM3;;;;UART_3" />
+  <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\UART_3_BOOT.c" value="SOURCE_C;CortexM3;;;;UART_3" />
+  <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\isr_3.c" value="SOURCE_C;CortexM3;;;;isr_3" />
+  <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\isr_3.h" value="HEADER;;;;;isr_3" />
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\QuadDec_1_Cnt16.c" value="SOURCE_C;CortexM3;;;;QuadDec_1_Cnt16" />
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\QuadDec_1_Cnt16.h" value="HEADER;;;;;QuadDec_1_Cnt16" />
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\QuadDec_1_Cnt16_PM.c" value="SOURCE_C;CortexM3;;;;QuadDec_1_Cnt16" />
@@ -88,6 +95,8 @@
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\QuadDec_2_Cnt16_PM.c" value="SOURCE_C;CortexM3;;;;QuadDec_2_Cnt16" />
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\UART_2_IntClock.c" value="SOURCE_C;CortexM3;;;;UART_2_IntClock" />
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\UART_2_IntClock.h" value="HEADER;;;;;UART_2_IntClock" />
+  <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\UART_3_IntClock.c" value="SOURCE_C;CortexM3;;;;UART_3_IntClock" />
+  <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\UART_3_IntClock.h" value="HEADER;;;;;UART_3_IntClock" />
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\cm3gcc.ld" value="LINKER_SCRIPT;;;b98f980c-3bd1-4fc7-a887-c56a20a46fdd;;cy_boot" />
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\Cm3RealView.scat" value="LINKER_SCRIPT;;;fdb8e1ae-f83a-46cf-9446-1d703716f38a;;cy_boot" />
   <file name="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\codegentemp\Cm3Start.c" value="SOURCE_C;CortexM3;;;;cy_boot" />
