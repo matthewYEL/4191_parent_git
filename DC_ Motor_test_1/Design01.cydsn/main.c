@@ -30,7 +30,34 @@ int cmd_code = 0;
  * This is not a camera acknowledgement; slow frames may require a longer wait.
  */
 #define CAMERA_SETTLE_MS 600u
-#define MOTOR_CONTROL_PERIOD_MS 100u
+#define MOTOR_CONTROL_PERIOD_MS 20u /* Applies to translation and turns. */
+/* Translation tuning defaults: validate on the loaded robot. */
+#define DRIVE_PWM 180
+#define MIN_DRIVE_PWM 115
+#define STRAIGHT_KP 0.15f
+#define SLOWDOWN_PULSES 450
+#define MAX_STRAIGHT_CORRECTION 50
+/* Leave at zero until repeatable physical overshoot has been measured. */
+#define STOP_COMPENSATION_PULSES 0
+#define MOTOR_DEBUG_PERIOD_MS 200u
+#define DRIVE_MAX_MISMATCH 300
+#define DRIVE_STOP_MISMATCH 100
+#define DRIVE_REVERSE_TOLERANCE 20
+#define DRIVE_STALL_COUNTS 4
+#define DRIVE_STALL_MS 1000u
+#define DRIVE_TIMEOUT_MS 15000u
+/* Faults latch until reset; inspect these using the debugger.
+ * 1 wrong direction, 2 excessive mismatch, 3 stall, 4 timeout,
+ * 5 mismatch at destination, 6 unsupported negative step count.
+ */
+volatile uint8 drive_fault = 0u;
+volatile int drive_progress1 = 0, drive_progress2 = 0;
+volatile int drive_pwm1 = 0, drive_pwm2 = 0;
+volatile uint32 drive_update_interval_ms = 0u;
+static uint8 drive_active = 0u;
+static uint32 drive_started_ms, drive_last_update_ms;
+static uint32 drive_progress_ms1, drive_progress_ms2;
+static int drive_checkpoint1, drive_checkpoint2;
 enum { CAMERA_SETTLING, CAMERA_WAIT_RESULT, CAMERA_READY, CAMERA_MOVING };
 static volatile uint8 camera_state = CAMERA_SETTLING;
 static volatile uint32 camera_ms = 0u;
@@ -52,11 +79,10 @@ static void camera_tick(void)
 #define PULSES_PER_225DEGREE  6470
 #define PULSES_PER_270DEGREE  7800
 #define PULSES_PER_315DEGREE  9200
-#define MASTER_PWM 230   /* fixed PWM for the master (reference) motor */
-#define KP 0.15          /* P-controller gain: corrects the slave motor's
-                          * PWM based on encoder-count error vs the master,
-                          * so both wheels stay in sync and the robot
-                          * drives straight instead of curving */
+/* Turn PWM and gain are unchanged, but turns now update every 20 ms.
+ * Recheck physical turn angles with the faster update interval. */
+#define MASTER_PWM 230
+#define KP 0.15f
 
 typedef struct {
     char type;
@@ -488,6 +514,7 @@ int while_condition_true(void)
  */
 void advance_command_index(int heading_delta_deg)
 {
+    drive_active = 0u;
     begin_camera_scan();
 
     TurtleCommand *finished = executing_if    ? &if_cmd_queue[if_cmd_idx]
@@ -557,6 +584,144 @@ int compute_slave_pwm(int error)
     return pwm_slave;
 }
 
+/* Positive progress means travel in the commanded direction.
+ * Unlike turns, translation adjusts BOTH motors around a common base.
+ */
+static void compute_drive_pwm(int p1, int p2, int remaining,
+                              int *pwm1, int *pwm2)
+{
+    int base = DRIVE_PWM;
+    int trim = (int)(STRAIGHT_KP * (p1 - p2));
+    if (remaining <= 0)
+    {
+        *pwm1 = *pwm2 = 0;
+        return;
+    }
+    if (remaining < SLOWDOWN_PULSES)
+        base = MIN_DRIVE_PWM +
+            (DRIVE_PWM - MIN_DRIVE_PWM) * remaining / SLOWDOWN_PULSES;
+    if (trim > MAX_STRAIGHT_CORRECTION) trim = MAX_STRAIGHT_CORRECTION;
+    if (trim < -MAX_STRAIGHT_CORRECTION) trim = -MAX_STRAIGHT_CORRECTION;
+    *pwm1 = base - trim;
+    *pwm2 = base + trim;
+    if (*pwm1 < 0) *pwm1 = 0;
+    if (*pwm1 > 255) *pwm1 = 255;
+    if (*pwm2 < 0) *pwm2 = 0;
+    if (*pwm2 > 255) *pwm2 = 255;
+}
+
+/* Rate limiting reduces UART load but does not make PutString nonblocking. */
+static uint8 motor_debug_due(void)
+{
+    static uint32 last_debug_ms = 0u;
+    uint32 now = camera_ms;
+    if ((uint32)(now - last_debug_ms) < MOTOR_DEBUG_PERIOD_MS) return 0u;
+    last_debug_ms = now;
+    return 1u;
+}
+
+static void stop_drive_fault(uint8 reason)
+{
+    drive_fault = reason;
+    stop_motors();
+    PWM_1_WriteCompare(0);
+    PWM_2_WriteCompare(0);
+    drive_pwm1 = drive_pwm2 = 0;
+    drive_active = 0u;
+    /* Do not advance the queue or report a failed grid as completed. */
+    uart_printf("DRIVE FAULT=%u P1=%d P2=%d; reset required\r\n",
+                (unsigned int)reason, drive_progress1, drive_progress2);
+}
+
+static void update_drive(uint8 forward, int c1, int c2, int target)
+{
+    uint32 now = camera_ms;
+    int p1 = forward ? -c1 : c1;
+    int p2 = forward ? -c2 : c2;
+    int mismatch = abs(p1 - p2);
+    int stop_target = target - STOP_COMPENSATION_PULSES;
+    int remaining;
+    if (stop_target < 0) stop_target = 0;
+    remaining = stop_target - (p1 + p2) / 2;
+    int pwm1, pwm2;
+    drive_progress1 = p1;
+    drive_progress2 = p2;
+    if (!drive_active)
+    {
+        drive_active = 1u;
+        drive_started_ms = drive_progress_ms1 = drive_progress_ms2 = now;
+        drive_last_update_ms = now;
+        drive_checkpoint1 = p1;
+        drive_checkpoint2 = p2;
+        drive_update_interval_ms = 0u;
+    }
+    else
+    {
+        drive_update_interval_ms = (uint32)(now - drive_last_update_ms);
+        drive_last_update_ms = now;
+    }
+    if (p1 < -DRIVE_REVERSE_TOLERANCE || p2 < -DRIVE_REVERSE_TOLERANCE)
+    {
+        stop_drive_fault(1u);
+        return;
+    }
+    if (mismatch > DRIVE_MAX_MISMATCH)
+    {
+        stop_drive_fault(2u);
+        return;
+    }
+    if (remaining <= 0)
+    {
+        /* Stop before logging. Do not continue travelling to chase a
+         * mismatched wheel after the average has reached the target. */
+        stop_motors();
+        PWM_1_WriteCompare(0);
+        PWM_2_WriteCompare(0);
+        drive_pwm1 = drive_pwm2 = 0;
+        if (mismatch > DRIVE_STOP_MISMATCH)
+        {
+            stop_drive_fault(5u);
+            return;
+        }
+        advance_command_index(0);
+        uart_printf("DRIVE STOP P1=%d P2=%d TARGET=%d\r\n", p1, p2, target);
+        return;
+    }
+    if ((uint32)(now - drive_started_ms) >= DRIVE_TIMEOUT_MS)
+    {
+        stop_drive_fault(4u);
+        return;
+    }
+    if (p1 - drive_checkpoint1 >= DRIVE_STALL_COUNTS)
+    {
+        drive_checkpoint1 = p1;
+        drive_progress_ms1 = now;
+    }
+    if (p2 - drive_checkpoint2 >= DRIVE_STALL_COUNTS)
+    {
+        drive_checkpoint2 = p2;
+        drive_progress_ms2 = now;
+    }
+    if ((uint32)(now - drive_progress_ms1) >= DRIVE_STALL_MS ||
+        (uint32)(now - drive_progress_ms2) >= DRIVE_STALL_MS)
+    {
+        stop_drive_fault(3u);
+        return;
+    }
+    compute_drive_pwm(p1, p2, remaining, &pwm1, &pwm2);
+    drive_pwm1 = pwm1;
+    drive_pwm2 = pwm2;
+    PWM_1_WriteCompare(pwm1);
+    PWM_2_WriteCompare(pwm2);
+    Motor_1_IN_1_Write(forward ? 0 : 1);
+    Motor_1_IN_2_Write(forward ? 1 : 0);
+    Motor_2_IN_3_Write(forward ? 0 : 1);
+    Motor_2_IN_4_Write(forward ? 1 : 0);
+    if (motor_debug_due())
+        uart_printf("DRIVE P1=%d P2=%d PWM1=%d PWM2=%d DT=%lu\r\n",
+                    p1, p2, pwm1, pwm2, (unsigned long)drive_update_interval_ms);
+}
+
 void parse_while_body(char *text)
 {
     char *p = text;
@@ -585,6 +750,7 @@ void parse_while_body(char *text)
 CY_ISR(ISR_Handler_1)
 {
     Rx = UART_1_GetChar();
+    if (drive_fault) { rx_index = 0; return; }
     
     if (Rx != '\0')
     { 
@@ -1296,6 +1462,11 @@ int main(void)
     for(;;)
     {  
         /* Place your application code here. */
+        if (drive_fault)
+        {
+            stop_motors();
+            continue;
+        }
         check_camera_uart();
         if (camera_state == CAMERA_SETTLING || camera_state == CAMERA_WAIT_RESULT)
         {
@@ -1341,18 +1512,15 @@ int main(void)
             continue;
         }
 
-        /* Preserve the nominal 100 ms motor update period without blocking
-         * UART servicing. Sample encoders when the update is actually due.
-         */
+        /* Motor calculations are due every 20 ms; UART work can delay them. */
         if ((uint32)(camera_ms - last_motor_update_ms) < MOTOR_CONTROL_PERIOD_MS)
-        {
             continue;
-        }
         last_motor_update_ms = camera_ms;
 
         if (request_reset_start)
         {
             request_reset_start = 0;
+            drive_active = 0u;
             start_c1 = QuadDec_1_GetCounter();
             start_c2 = QuadDec_2_GetCounter();
         }
@@ -1505,51 +1673,22 @@ int main(void)
             }
             break;
             break;
-            case 'f'://forward
+            case 'f': // forward, cardinal or diagonal
+            case 'b': // backward, cardinal or diagonal
             {
-                /* param holds a signed grid-step count; pick the pulse
-                 * count per step from the *current* heading so this
-                 * stays correct across repeated while-loop passes. */
-                int pulses_per_step = heading_is_diagonal(current_heading_deg)
-                                           ? PULSES_PER_DIAGONAL
-                                           : PULSES_PER_GRID;
-                /* One grid per segment; advance_command_index tracks the rest. */
-                int target = (current_cmd->param < 0 ? -1 : 1) * pulses_per_step;
-
-                /*
-                 * P-control (KP) keeps the two wheels' encoder counts
-                 * in sync so the robot drives straight: master motor
-                 * runs at a fixed MASTER_PWM, slave motor's PWM is
-                 * nudged up/down by KP * error.
-                 *
-                 * Forward motion drives relative_c2 (and relative_c1)
-                 * DOWN toward a negative target, so "ahead" means
-                 * "more negative". error = slave - master: if slave
-                 * has gone more negative than master (slave ahead),
-                 * error < 0 -> slave PWM decreases (slow down); if
-                 * slave lags (less negative than master), error > 0
-                 * -> slave PWM increases (speed up). Negative feedback.
-                 */
-                int error = relative_c1 - relative_c2;
-                int pwm_slave = compute_slave_pwm(error);
-
-                PWM_2_WriteCompare(MASTER_PWM);
-                PWM_1_WriteCompare(pwm_slave);
-
-                uart_printf("M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
-                            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
-
-                if (relative_c2 >= target)
+                int target = heading_is_diagonal(current_heading_deg)
+                             ? PULSES_PER_DIAGONAL : PULSES_PER_GRID;
+                uint8 forward = (current_cmd->type == 'f');
+                /* Existing parser stores positive fd counts as negative,
+                 * positive bk counts as positive. Negative user counts
+                 * previously produced invalid movement: report explicitly. */
+                if ((forward && current_cmd->param > 0) ||
+                    (!forward && current_cmd->param < 0))
                 {
-                    Motor_1_IN_1_Write(0);
-                    Motor_1_IN_2_Write(1);
-                    Motor_2_IN_3_Write(0);
-                    Motor_2_IN_4_Write(1);
+                    stop_drive_fault(6u);
+                    break;
                 }
-                else
-                {
-                    advance_command_index(0);
-                }
+                update_drive(forward, relative_c1, relative_c2, target);
             }
             break;
             case 'l'://turn left
@@ -1569,7 +1708,8 @@ int main(void)
                 PWM_2_WriteCompare(MASTER_PWM);
                 PWM_1_WriteCompare(pwm_slave);
 
-                uart_printf("LT M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
+                if (motor_debug_due())
+                    uart_printf("LT M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
                             relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
 
                 if (relative_c2 >= target)
@@ -1582,39 +1722,6 @@ int main(void)
                 else
                 {
                     advance_command_index(current_cmd->turn_delta_deg);
-                }
-                break;
-            }
-            case 'b'://backward
-            {
-                /* param holds a signed grid-step count; pick the pulse
-                 * count per step from the *current* heading, same as
-                 * the 'f' case above. */
-                int pulses_per_step = heading_is_diagonal(current_heading_deg)
-                                           ? PULSES_PER_DIAGONAL
-                                           : PULSES_PER_GRID;
-                /* One grid per segment; advance_command_index tracks the rest. */
-                int target = (current_cmd->param < 0 ? -1 : 1) * pulses_per_step;
-
-                int error = relative_c2 - relative_c1;
-                int pwm_slave = compute_slave_pwm(error);
-
-                PWM_2_WriteCompare(MASTER_PWM);
-                PWM_1_WriteCompare(pwm_slave);
-
-                uart_printf("M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
-                            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
-
-                if (relative_c2 <= target)
-                {
-                    Motor_1_IN_1_Write(1);
-                    Motor_1_IN_2_Write(0);
-                    Motor_2_IN_3_Write(1);
-                    Motor_2_IN_4_Write(0);
-                }
-                else
-                {
-                    advance_command_index(0);
                 }
                 break;
             }
@@ -1635,7 +1742,8 @@ int main(void)
                 PWM_2_WriteCompare(MASTER_PWM);
                 PWM_1_WriteCompare(pwm_slave);
 
-                uart_printf("RT M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
+                if (motor_debug_due())
+                    uart_printf("RT M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
                             relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
 
                 if (relative_c2 <= target)
