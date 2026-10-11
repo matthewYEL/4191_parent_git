@@ -335,6 +335,110 @@ select {
   display: none;
 }
 
+
+.checkbox-row-wrapper {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.game-checkboxes {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* Organizes list downwards */
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.section-label {
+  font-weight: bold;
+  font-size: 14px;
+  color: #0f172a;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 4px;
+}
+
+.print-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+}
+
+.game-checkboxes input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #64748b;
+  border-radius: 4px;
+  background-color: #ffffff;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  margin: 0;
+  flex-shrink: 0;
+  transition: all 0.15s ease-in-out;
+}
+
+/* 1. STANDARD CHECKMARK (Green ✓) */
+.game-checkboxes input[type="checkbox"]:not(.cross-checkbox)::after {
+  content: "✓";
+  font-size: 13px;
+  font-weight: bold;
+  color: #16a34a; /* Green checkmark */
+  line-height: 1;
+  display: none;
+}
+
+.game-checkboxes input[type="checkbox"]:not(.cross-checkbox):checked::after {
+  display: block;
+}
+
+.game-checkboxes input[type="checkbox"]:not(.cross-checkbox):checked {
+  border-color: #16a34a;
+  background-color: #f0fdf4;
+}
+
+/* 2. RED CROSS CHECKBOX (Red ✖) */
+.game-checkboxes input[type="checkbox"].cross-checkbox::after {
+  content: "✖";
+  font-size: 13px;
+  font-weight: bold;
+  color: #dc2626; /* Red cross */
+  line-height: 1;
+  display: none;
+}
+
+.game-checkboxes input[type="checkbox"].cross-checkbox:checked::after {
+  display: block;
+}
+
+.game-checkboxes input[type="checkbox"].cross-checkbox:checked {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+/* Disabled checkbox & label state */
+.print-checkbox-item.disabled-item {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.print-checkbox-item input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  background-color: #e2e8f0;
+  border-color: #94a3b8;
+}
+
 /* PDF / Print View Settings */
 @media print {
   /* Hide interactive input controls during print */
@@ -366,6 +470,28 @@ select {
     font-family: monospace;
     font-size: 14px;
     white-space: pre-wrap;
+  }
+
+  .checkbox-row-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 12px !important;
+  }
+
+  .game-checkboxes {
+    border: 1px solid #000000 !important;
+    background-color: #ffffff !important;
+  }
+
+  .game-checkboxes input[type="checkbox"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    border: 2px solid #000000 !important;
+  }
+
+  /* Keep sharp black contrast during printing */
+  .game-checkboxes input[type="checkbox"]::after {
+    color: #000000 !important;
   }
 }
 

@@ -144,6 +144,7 @@ export async function executeLogoCommands(commandString) {
     return;
   }
 
+  resetHighlights();
   clearTrail();
   syncRobotToStart();
 
@@ -294,9 +295,15 @@ function highlightCurrentRobotCell(colIdx, rowIdx) {
 }
 
 export function clearTrail() {
+  if (!container) return;
+
   container.querySelectorAll('.grid-cell').forEach(cell => {
-    cell.classList.remove('path-trail', 'robot-current');
-    
+    cell.classList.remove('path-trail', 'robot-current', 'cell-selected');
+    cell.style.removeProperty('background-color');
+    cell.style.removeProperty('border-color');
+    cell.style.backgroundColor = '';
+    cell.style.borderColor = '';
+
     // Restore underlying placed items (🚀, 🏁, 🧱, A-U) or leave blank
     const key = `${cell.dataset.col}${cell.dataset.row}`;
     if (boardState[key]) {
@@ -422,6 +429,7 @@ function clearEntireGrid() {
   Object.keys(boardState).forEach(coord => removeCoordinate(coord));
   startCoord = null;
   destCoord = null;
+  clearTrail();
   updateUI();
 }
 
@@ -461,18 +469,36 @@ function updateUI() {
   if (vowelCount) vowelCount.innerText = vowels.length;
   if (vowelDisplay) vowelDisplay.innerText = vowels.length > 0 ? vowels.join(', ') : 'None';
 
-  // 4. Gray out PDF button if Start or Destination is missing
+  // 4. Gray out PDF button if Start is missing
   if (pdfBtn) {
-    const isComplete = Boolean(startCoord && destCoord);
+    const isComplete = Boolean(startCoord);
     pdfBtn.disabled = !isComplete;
     
     // Add tooltip explaining why it's grayed out
     if (!isComplete) {
-      pdfBtn.title = "Set both Start (🚀), Destination (🏁) and Starting Facing Direction to unlock PDF export.";
+      pdfBtn.title = "Set Start (🚀) to unlock PDF export.";
     } else {
       pdfBtn.removeAttribute('title');
     }
   }
+}
+
+export function resetHighlights() {
+  if (!container) return;
+  container.querySelectorAll('.grid-cell').forEach(cell => {
+    cell.classList.remove('path-trail', 'robot-current', 'cell-selected');
+    cell.style.backgroundColor = '';
+    cell.style.borderColor = '';
+
+    const key = `${cell.dataset.col}${cell.dataset.row}`;
+
+    // Teacher view ALWAYS sees vowel symbols on screen grid
+    if (boardState[key]) {
+      cell.innerText = boardState[key].symbol;
+    } else {
+      cell.innerText = '';
+    }
+  });
 }
 
 function getItemConfig(type) {

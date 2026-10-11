@@ -13,8 +13,31 @@
     <div class="grid-section">
       <div id="gridContainer" class="grid-20x20"></div>
       <!-- Compass container placed underneath the grid -->
-      <div class="compass-footer">
+      <div class="compass-wrapper">
         <img src="compass.png" alt="Grid Compass" class="grid-compass-img" />
+      </div>
+      <div class="checkbox-row-wrapper">
+        <div class="game-checkboxes" id="includeGroup">
+          <span for="section-label">Must Include:</span>
+          <label class="print-checkbox-item"><input type="checkbox" data-command="ifelse"/><span>ifelse</span></label>
+          <label class="print-checkbox-item"><input type="checkbox" data-command="repeat"/><span>repeat</span></label>
+          <label class="print-checkbox-item"><input type="checkbox" data-command="while"/><span>while</span></label>
+          <label class="print-checkbox-item"><input type="checkbox" data-command="forward"/><span>forward</span></label>
+          <label class="print-checkbox-item"><input type="checkbox" data-command="backward"/><span>backward</span></label>
+          <label class="print-checkbox-item"><input type="checkbox" data-command="left"/><span>left turn</span></label> 
+          <label class="print-checkbox-item"><input type="checkbox" data-command="right"/><span>right turn</span></label>
+        </div>
+
+        <div class="game-checkboxes">
+          <span for="section-label">Must Exclude:</span>
+          <label class="print-checkbox-item"><input type="checkbox" class="cross-checkbox" data-command="ifelse"/><span>ifelse</span></label>
+          <label class="print-checkbox-item"><input type="checkbox" class="cross-checkbox" data-command="repeat"/><span>repeat</span></label>
+          <label class="print-checkbox-item"><input type="checkbox" class="cross-checkbox" data-command="while"/><span>while</span></label>
+          <label class="print-checkbox-item"><input type="checkbox" class="cross-checkbox" data-command="forward"/><span>forward</span></label>
+          <label class="print-checkbox-item"><input type="checkbox" class="cross-checkbox" data-command="backward"/><span>backward</span></label>
+          <label class="print-checkbox-item"><input type="checkbox" class="cross-checkbox" data-command="left"/><span>left turn</span></label> 
+          <label class="print-checkbox-item"><input type="checkbox" class="cross-checkbox" data-command="right"/><span>right turn</span></label>
+        </div>
       </div>
     </div>
 
@@ -56,6 +79,11 @@
           <span>🗣️ Vowels (<span id="vowelCount">0</span>): <strong id="vowelDisplay">None</strong></span>
           <button id="clearVowelBtn" class="btn-mini btn-danger">Clear</button>
         </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="showVowelsToggle" checked />
+          <label for="showVowelsToggle">Show Vowels to Students</label>
+        </div>
       </div>
 
       <!-- Item Placement Inputs -->
@@ -64,7 +92,7 @@
         
         <select id="itemTypeSelect" class="item-select">
           <option value="start">🚀 Start (Required)</option>
-          <option value="dest">🏁 Destination (Required)</option>
+          <option value="dest">🏁 Destination (Optional)</option>
           <option value="obstacle">🧱 Obstacle (Optional)</option>
           <option value="A">Letter A (Optional)</option>
           <option value="E">Letter E (Optional)</option>
@@ -76,7 +104,7 @@
         <button id="placeBtn" class="btn btn-secondary" style="flex: 1;">Place Item</button>
         <button id="clearAllBtn" class="btn btn-outline-danger">Clear All</button>
         
-        <button id="pdfBtn" class="btn btn-send" style="margin-top: 15px;" disabled title="Set both Start (🚀) and Destination (🏁) points to unlock PDF export.">Save as PDF</button>
+        <button id="pdfBtn" class="btn btn-send" style="margin-top: 15px;" disabled title="Set Start (🚀) point to unlock PDF export.">Save as PDF</button>
         <button id="connectBtn" class="btn btn-connect">Connect to Robot</button>
       </div>
 
