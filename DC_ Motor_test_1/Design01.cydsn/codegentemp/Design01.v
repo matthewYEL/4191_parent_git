@@ -1,6 +1,6 @@
 // ======================================================================
 // Design01.v generated from TopDesign.cysch
-// 10/01/2026 at 09:17
+// 10/13/2026 at 18:40
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -1198,21 +1198,21 @@ module top ;
           wire  Net_40;
           wire  Net_38;
           wire  Net_34;
-          wire  Net_30;
-          wire  Net_29;
-          wire  Net_27;
-          wire  Net_26;
-          wire  Net_24;
-          wire  Net_23;
-          wire  Net_21;
-          wire  Net_20;
-          wire  Net_19;
-          wire  Net_17;
+          wire  Net_239;
+          wire  Net_238;
+          wire  Net_237;
+          wire  Net_236;
+          wire  Net_235;
+          wire  Net_234;
+          wire  Net_233;
+          wire  Net_232;
+          wire  Net_231;
+          wire  Net_230;
+          wire  Net_268;
+          wire  Net_269;
           wire  Net_48;
           wire  Net_45;
-          wire  Net_18;
           wire  Net_135;
-          wire  Net_114;
           wire  Net_118;
           wire  Net_37;
           wire  Net_36;
@@ -1370,18 +1370,18 @@ module top ;
 
     PWM_v3_30_0 PWM_1 (
         .capture(1'b0),
-        .clock(Net_18),
+        .clock(Net_268),
         .cmp_sel(1'b0),
         .enable(1'b1),
-        .interrupt(Net_21),
+        .interrupt(Net_233),
         .kill(Net_135),
-        .ph1(Net_23),
-        .ph2(Net_24),
+        .ph1(Net_234),
+        .ph2(Net_235),
         .pwm(Net_25),
-        .pwm1(Net_26),
-        .pwm2(Net_27),
+        .pwm1(Net_236),
+        .pwm2(Net_237),
         .reset(Net_135),
-        .tc(Net_29),
+        .tc(Net_238),
         .trigger(1'b0));
     defparam PWM_1.Resolution = 8;
 
@@ -1394,7 +1394,7 @@ module top ;
 		  .is_direct(0),
 		  .is_digital(1))
 		Clock_1
-		 (.clock_out(Net_18));
+		 (.clock_out(Net_268));
 
 
     assign Net_135 = 1'h0;
@@ -1475,7 +1475,7 @@ module top ;
 	assign tmpOE__Motor_1_ENA_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
 
     QuadDec_v3_0_2 QuadDec_1 (
-        .clock(Net_18),
+        .clock(Net_268),
         .index(1'b0),
         .interrupt(Net_40),
         .quad_A(Net_36),
@@ -1960,7 +1960,7 @@ module top ;
 
     PWM_v3_30_4 PWM_2 (
         .capture(1'b0),
-        .clock(Net_114),
+        .clock(Net_269),
         .cmp_sel(1'b0),
         .enable(1'b1),
         .interrupt(Net_117),
@@ -1984,7 +1984,7 @@ module top ;
 		  .is_direct(0),
 		  .is_digital(1))
 		Clock_2
-		 (.clock_out(Net_114));
+		 (.clock_out(Net_269));
 
 
     assign Net_118 = 1'h0;
@@ -2065,7 +2065,7 @@ module top ;
 	assign tmpOE__Motor_2_ENB_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
 
     QuadDec_v3_0_6 QuadDec_2 (
-        .clock(Net_114),
+        .clock(Net_269),
         .index(1'b0),
         .interrupt(Net_134),
         .quad_A(Net_130),

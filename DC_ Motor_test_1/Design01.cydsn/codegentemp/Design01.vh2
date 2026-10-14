@@ -2,7 +2,7 @@
 --	Conversion of Design01.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Thu Oct 01 09:17:40 2026
+--	Tue Oct 13 18:40:31 2026
 --
 
 USE cypress.cypress.all;
@@ -24,7 +24,7 @@ SIGNAL tmpFB_0__Motor_1_IN_2_net_0 : bit;
 SIGNAL tmpIO_0__Motor_1_IN_2_net_0 : bit;
 TERMINAL tmpSIOVREF__Motor_1_IN_2_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__Motor_1_IN_2_net_0 : bit;
-SIGNAL Net_18 : bit;
+SIGNAL Net_268 : bit;
 SIGNAL \PWM_1:Net_107\ : bit;
 SIGNAL \PWM_1:Net_113\ : bit;
 SIGNAL Net_135 : bit;
@@ -32,8 +32,8 @@ SIGNAL \PWM_1:Net_63\ : bit;
 SIGNAL \PWM_1:Net_57\ : bit;
 SIGNAL \PWM_1:Net_54\ : bit;
 SIGNAL Net_25 : bit;
-SIGNAL Net_21 : bit;
-SIGNAL Net_29 : bit;
+SIGNAL Net_233 : bit;
+SIGNAL Net_238 : bit;
 SIGNAL \PWM_1:Net_114\ : bit;
 SIGNAL tmpOE__Motor_1_ENA_net_0 : bit;
 SIGNAL tmpFB_0__Motor_1_ENA_net_0 : bit;
@@ -633,7 +633,7 @@ SIGNAL tmpFB_0__Motor_2_IN_4_net_0 : bit;
 SIGNAL tmpIO_0__Motor_2_IN_4_net_0 : bit;
 TERMINAL tmpSIOVREF__Motor_2_IN_4_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__Motor_2_IN_4_net_0 : bit;
-SIGNAL Net_114 : bit;
+SIGNAL Net_269 : bit;
 SIGNAL \PWM_2:Net_107\ : bit;
 SIGNAL \PWM_2:Net_113\ : bit;
 SIGNAL Net_118 : bit;
@@ -2300,7 +2300,7 @@ Motor_1_IN_2:cy_psoc3_pins_v1_10
 		interrupt=>tmpINTERRUPT_0__Motor_1_IN_2_net_0);
 \PWM_1:PWMHW\:cy_psoc3_timer_v1_0
 	GENERIC MAP(cy_registers=>"")
-	PORT MAP(clock=>Net_18,
+	PORT MAP(clock=>Net_268,
 		kill=>zero,
 		enable=>tmpOE__Motor_1_IN_1_net_0,
 		capture=>zero,
@@ -2316,7 +2316,7 @@ Clock_1:cy_clock_v1_0
 		period=>"1000000000",
 		is_direct=>'0',
 		is_digital=>'1')
-	PORT MAP(clock_out=>Net_18,
+	PORT MAP(clock_out=>Net_268,
 		dig_domain_out=>open);
 Motor_1_ENA:cy_psoc3_pins_v1_10
 	GENERIC MAP(id=>"9ba7540f-8991-46a8-ba5e-e5aa5d242c39",
@@ -2390,12 +2390,12 @@ Motor_1_ENA:cy_psoc3_pins_v1_10
 		interrupt=>tmpINTERRUPT_0__Motor_1_ENA_net_0);
 \QuadDec_1:Cnt16:CounterUDB:clock_enable_block\:cy_psoc3_udb_clock_enable_v1_0
 	GENERIC MAP(sync_mode=>'1')
-	PORT MAP(clock_in=>Net_18,
+	PORT MAP(clock_in=>Net_268,
 		enable=>tmpOE__Motor_1_IN_1_net_0,
 		clock_out=>\QuadDec_1:Cnt16:CounterUDB:ClockOutFromEnBlock\);
 \QuadDec_1:Cnt16:CounterUDB:sCTRLReg:cy_psoc3_udb_Ctl_Clk_Sync\:cy_psoc3_udb_clock_enable_v1_0
 	GENERIC MAP(sync_mode=>'1')
-	PORT MAP(clock_in=>Net_18,
+	PORT MAP(clock_in=>Net_268,
 		enable=>tmpOE__Motor_1_IN_1_net_0,
 		clock_out=>\QuadDec_1:Cnt16:CounterUDB:Clk_Ctl_i\);
 \QuadDec_1:Cnt16:CounterUDB:sCTRLReg:ctrlreg\:cy_psoc3_control
@@ -2591,7 +2591,7 @@ Motor_1_ENA:cy_psoc3_pins_v1_10
 		po=>open);
 \QuadDec_1:bQuadDec:CtrlClkEn\:cy_psoc3_udb_clock_enable_v1_0
 	GENERIC MAP(sync_mode=>'1')
-	PORT MAP(clock_in=>Net_18,
+	PORT MAP(clock_in=>Net_268,
 		enable=>tmpOE__Motor_1_IN_1_net_0,
 		clock_out=>\QuadDec_1:bQuadDec:sync_clock\);
 \QuadDec_1:bQuadDec:genblk1:DelayA1\:cy_dff
@@ -3354,7 +3354,7 @@ Motor_2_IN_4:cy_psoc3_pins_v1_10
 		interrupt=>tmpINTERRUPT_0__Motor_2_IN_4_net_0);
 \PWM_2:PWMHW\:cy_psoc3_timer_v1_0
 	GENERIC MAP(cy_registers=>"")
-	PORT MAP(clock=>Net_114,
+	PORT MAP(clock=>Net_269,
 		kill=>zero,
 		enable=>tmpOE__Motor_1_IN_1_net_0,
 		capture=>zero,
@@ -3370,7 +3370,7 @@ Clock_2:cy_clock_v1_0
 		period=>"1000000000",
 		is_direct=>'0',
 		is_digital=>'1')
-	PORT MAP(clock_out=>Net_114,
+	PORT MAP(clock_out=>Net_269,
 		dig_domain_out=>open);
 Motor_2_ENB:cy_psoc3_pins_v1_10
 	GENERIC MAP(id=>"9a5e2e60-abdc-40fa-ab83-a2c81735d99e",
@@ -3444,12 +3444,12 @@ Motor_2_ENB:cy_psoc3_pins_v1_10
 		interrupt=>tmpINTERRUPT_0__Motor_2_ENB_net_0);
 \QuadDec_2:Cnt16:CounterUDB:clock_enable_block\:cy_psoc3_udb_clock_enable_v1_0
 	GENERIC MAP(sync_mode=>'1')
-	PORT MAP(clock_in=>Net_114,
+	PORT MAP(clock_in=>Net_269,
 		enable=>tmpOE__Motor_1_IN_1_net_0,
 		clock_out=>\QuadDec_2:Cnt16:CounterUDB:ClockOutFromEnBlock\);
 \QuadDec_2:Cnt16:CounterUDB:sCTRLReg:cy_psoc3_udb_Ctl_Clk_Sync\:cy_psoc3_udb_clock_enable_v1_0
 	GENERIC MAP(sync_mode=>'1')
-	PORT MAP(clock_in=>Net_114,
+	PORT MAP(clock_in=>Net_269,
 		enable=>tmpOE__Motor_1_IN_1_net_0,
 		clock_out=>\QuadDec_2:Cnt16:CounterUDB:Clk_Ctl_i\);
 \QuadDec_2:Cnt16:CounterUDB:sCTRLReg:ctrlreg\:cy_psoc3_control
@@ -3645,7 +3645,7 @@ Motor_2_ENB:cy_psoc3_pins_v1_10
 		po=>open);
 \QuadDec_2:bQuadDec:CtrlClkEn\:cy_psoc3_udb_clock_enable_v1_0
 	GENERIC MAP(sync_mode=>'1')
-	PORT MAP(clock_in=>Net_114,
+	PORT MAP(clock_in=>Net_269,
 		enable=>tmpOE__Motor_1_IN_1_net_0,
 		clock_out=>\QuadDec_2:bQuadDec:sync_clock\);
 \QuadDec_2:bQuadDec:genblk1:DelayA1\:cy_dff

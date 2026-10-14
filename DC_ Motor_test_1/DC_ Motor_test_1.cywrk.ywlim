@@ -13,7 +13,7 @@
 <v>Output</v>
 </TreeKeys>
 <TreeStates>
-<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="DC_ Motor_test_1\Design01\Design01.cydwr">
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
 <ExpandedNodeIds>
 <v>DC_ Motor_test_1</v>
 <v>DC_ Motor_test_1\Design01</v>
@@ -238,6 +238,9 @@
 <CyGuid_67999771-01c6-4f62-90b3-2054bb36a318 type_name="CyDesigner.Framework.CyBookmark" version="1">
 <CyGuid_a1027fc4-3497-43a6-85d7-b91ffa0029b7 type_name="CyDesigner.Framework.CySerializableMarginIndicator" version="1" LineNumber="58" DocumentName="..\..\..\main.c" />
 </CyGuid_67999771-01c6-4f62-90b3-2054bb36a318>
+<CyGuid_67999771-01c6-4f62-90b3-2054bb36a318 type_name="CyDesigner.Framework.CyBookmark" version="1">
+<CyGuid_a1027fc4-3497-43a6-85d7-b91ffa0029b7 type_name="CyDesigner.Framework.CySerializableMarginIndicator" version="1" LineNumber="1702" DocumentName=".\Design01.cydsn\main.c" />
+</CyGuid_67999771-01c6-4f62-90b3-2054bb36a318>
 </indicators>
 </CyGuid_5f2be1a5-0687-4501-bb8c-cf21cb8211bf>
 </dataGuid>
@@ -246,6 +249,8 @@
 <Unloaded />
 <OpenDocs>
 <name v=".\Design01.cydsn\main.c" />
+<name v=".\Design01.cydsn\TopDesign\TopDesign.cysch" />
+<name v=".\Design01.cydsn\Design01.cydwr" />
 </OpenDocs>
 <OpenDocsLayout><![CDATA[<?xml version="1.0"?><!--
 
@@ -253,7 +258,7 @@
   Copyright (c) 2001-2016 Actipro Software LLC.  All rights reserved.
   http://www.actiprosoftware.com
 
---><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Horizontal"><TabbedMdiContainer Size="1217, 308" SelectedTabbedMdiWindow="20801cb1-39b3-4dbf-99dd-6f0bc860b879"><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="9a6994d9-3dc5-4ec6-bde4-0cab6998e94c" /><DocumentWindow Key="C:\Users\ywlim\Downloads\3\DC_ Motor_test_1 - Pcontroller\DC_ Motor_test_1 - Pcontroller\Design01.cydsn\main.c" Guid="20801cb1-39b3-4dbf-99dd-6f0bc860b879" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
+--><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Horizontal"><TabbedMdiContainer Size="1257, 385" SelectedTabbedMdiWindow="cb49882f-0955-4186-9998-fbfb2e7f28a3"><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="9a6994d9-3dc5-4ec6-bde4-0cab6998e94c" /><DocumentWindow Key="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\main.c" Guid="7c498e54-400d-439c-bd5c-859d09cae74b" /><DocumentWindow Key="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\TopDesign\TopDesign.cysch" Guid="85d63c70-e72a-4de7-b923-3c2575b2d0f3" /><DocumentWindow Key="D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\Design01.cydwr" Guid="cb49882f-0955-4186-9998-fbfb2e7f28a3" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
 <config v="Debug" />
 <AutoUpdate v="true" />
 </CyGuid_843a90a4-0c4b-4e44-991d-05e7fb117a21>

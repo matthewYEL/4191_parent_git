@@ -1,5 +1,5 @@
 -- Project:   Design01
--- Generated: 10/01/2026 09:17:41
+-- Generated: 10/13/2026 18:40:32
 -- PSoC Creator  4.4
 
 ENTITY Design01 IS
@@ -65,10 +65,6 @@ ARCHITECTURE __DEFAULT__ OF Design01 IS
     SIGNAL Motor_2_IN_4(0)__PA : bit;
     SIGNAL Motor_2_Phase_A(0)__PA : bit;
     SIGNAL Motor_2_Phase_B(0)__PA : bit;
-    SIGNAL Net_114 : bit;
-    ATTRIBUTE udbclken_assigned OF Net_114 : SIGNAL IS "True";
-    ATTRIBUTE global_signal OF Net_114 : SIGNAL IS true;
-    SIGNAL Net_114_local : bit;
     SIGNAL Net_121 : bit;
     SIGNAL Net_130 : bit;
     SIGNAL Net_131 : bit;
@@ -78,11 +74,15 @@ ARCHITECTURE __DEFAULT__ OF Design01 IS
     SIGNAL Net_167 : bit;
     SIGNAL Net_170 : bit;
     SIGNAL Net_171 : bit;
-    SIGNAL Net_18 : bit;
-    ATTRIBUTE udbclken_assigned OF Net_18 : SIGNAL IS "True";
-    ATTRIBUTE global_signal OF Net_18 : SIGNAL IS true;
-    SIGNAL Net_18_local : bit;
     SIGNAL Net_25 : bit;
+    SIGNAL Net_268 : bit;
+    ATTRIBUTE udbclken_assigned OF Net_268 : SIGNAL IS "True";
+    ATTRIBUTE global_signal OF Net_268 : SIGNAL IS true;
+    SIGNAL Net_268_local : bit;
+    SIGNAL Net_269 : bit;
+    ATTRIBUTE udbclken_assigned OF Net_269 : SIGNAL IS "True";
+    ATTRIBUTE global_signal OF Net_269 : SIGNAL IS true;
+    SIGNAL Net_269_local : bit;
     SIGNAL Net_36 : bit;
     SIGNAL Net_37 : bit;
     SIGNAL Net_45 : bit;
@@ -335,9 +335,9 @@ ARCHITECTURE __DEFAULT__ OF Design01 IS
     ATTRIBUTE lib_model OF Motor_1_ENA(0) : LABEL IS "iocell3";
     ATTRIBUTE Location OF Motor_1_ENA(0) : LABEL IS "P1[2]";
     ATTRIBUTE lib_model OF Motor_1_Phase_A(0) : LABEL IS "iocell4";
-    ATTRIBUTE Location OF Motor_1_Phase_A(0) : LABEL IS "P1[6]";
+    ATTRIBUTE Location OF Motor_1_Phase_A(0) : LABEL IS "P2[3]";
     ATTRIBUTE lib_model OF Motor_1_Phase_B(0) : LABEL IS "iocell5";
-    ATTRIBUTE Location OF Motor_1_Phase_B(0) : LABEL IS "P1[7]";
+    ATTRIBUTE Location OF Motor_1_Phase_B(0) : LABEL IS "P2[4]";
     ATTRIBUTE lib_model OF Rx_1(0) : LABEL IS "iocell6";
     ATTRIBUTE Location OF Rx_1(0) : LABEL IS "P2[6]";
     ATTRIBUTE lib_model OF Tx_1(0) : LABEL IS "iocell7";
@@ -349,9 +349,9 @@ ARCHITECTURE __DEFAULT__ OF Design01 IS
     ATTRIBUTE lib_model OF Motor_2_ENB(0) : LABEL IS "iocell10";
     ATTRIBUTE Location OF Motor_2_ENB(0) : LABEL IS "P2[0]";
     ATTRIBUTE lib_model OF Motor_2_Phase_A(0) : LABEL IS "iocell11";
-    ATTRIBUTE Location OF Motor_2_Phase_A(0) : LABEL IS "P2[3]";
+    ATTRIBUTE Location OF Motor_2_Phase_A(0) : LABEL IS "P12[2]";
     ATTRIBUTE lib_model OF Motor_2_Phase_B(0) : LABEL IS "iocell12";
-    ATTRIBUTE Location OF Motor_2_Phase_B(0) : LABEL IS "P2[4]";
+    ATTRIBUTE Location OF Motor_2_Phase_B(0) : LABEL IS "P12[3]";
     ATTRIBUTE lib_model OF Rx_2(0) : LABEL IS "iocell13";
     ATTRIBUTE Location OF Rx_2(0) : LABEL IS "P15[5]";
     ATTRIBUTE lib_model OF Tx_2(0) : LABEL IS "iocell14";
@@ -864,10 +864,10 @@ BEGIN
             clk_bus => ClockBlock_BUS_CLK_local,
             dsi_clkin_div => open,
             dsi_glb_div => open,
-            dclk_glb_0 => Net_18,
-            dclk_0 => Net_18_local,
-            dclk_glb_1 => Net_114,
-            dclk_1 => Net_114_local,
+            dclk_glb_0 => Net_268,
+            dclk_0 => Net_268_local,
+            dclk_glb_1 => Net_269,
+            dclk_1 => Net_269_local,
             dclk_glb_2 => \UART_2:Net_9\,
             dclk_2 => \UART_2:Net_9_local\,
             dclk_glb_3 => \UART_3:Net_9\,
@@ -2774,7 +2774,7 @@ BEGIN
             clk_inv => '0',
             clken_mode => 1)
         PORT MAP(
-            clock => Net_18,
+            clock => Net_268,
             control_7 => \QuadDec_1:Cnt16:CounterUDB:control_7\,
             control_6 => \QuadDec_1:Cnt16:CounterUDB:control_6\,
             control_5 => \QuadDec_1:Cnt16:CounterUDB:control_5\,
@@ -2795,7 +2795,7 @@ BEGIN
             reset_inv => '0')
         PORT MAP(
             reset => \QuadDec_1:Net_1260\,
-            clock => Net_18,
+            clock => Net_268,
             status_6 => \QuadDec_1:Cnt16:CounterUDB:status_6\,
             status_5 => \QuadDec_1:Cnt16:CounterUDB:status_5\,
             status_4 => open,
@@ -2832,7 +2832,7 @@ BEGIN
             clk_inv => '0',
             clken_mode => 1)
         PORT MAP(
-            clock => Net_18,
+            clock => Net_268,
             cs_addr_2 => \QuadDec_1:Net_1251\,
             cs_addr_1 => \QuadDec_1:Cnt16:CounterUDB:count_enable\,
             cs_addr_0 => \QuadDec_1:Cnt16:CounterUDB:reload\,
@@ -2879,7 +2879,7 @@ BEGIN
             clk_inv => '0',
             clken_mode => 1)
         PORT MAP(
-            clock => Net_18,
+            clock => Net_268,
             cs_addr_2 => \QuadDec_1:Net_1251\,
             cs_addr_1 => \QuadDec_1:Cnt16:CounterUDB:count_enable\,
             cs_addr_0 => \QuadDec_1:Cnt16:CounterUDB:reload\,
@@ -2911,7 +2911,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:bQuadDec:quad_A_delayed_0\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => Net_36);
 
     \QuadDec_1:bQuadDec:quad_A_delayed_1\:macrocell
@@ -2922,7 +2922,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:bQuadDec:quad_A_delayed_1\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:bQuadDec:quad_A_delayed_0\);
 
     \QuadDec_1:bQuadDec:quad_A_delayed_2\:macrocell
@@ -2933,7 +2933,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:bQuadDec:quad_A_delayed_2\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:bQuadDec:quad_A_delayed_1\);
 
     \QuadDec_1:bQuadDec:quad_B_delayed_0\:macrocell
@@ -2944,7 +2944,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:bQuadDec:quad_B_delayed_0\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => Net_37);
 
     \QuadDec_1:bQuadDec:quad_B_delayed_1\:macrocell
@@ -2955,7 +2955,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:bQuadDec:quad_B_delayed_1\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:bQuadDec:quad_B_delayed_0\);
 
     \QuadDec_1:bQuadDec:quad_B_delayed_2\:macrocell
@@ -2966,7 +2966,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:bQuadDec:quad_B_delayed_2\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:bQuadDec:quad_B_delayed_1\);
 
     \QuadDec_1:bQuadDec:Stsreg\:statusicell
@@ -2977,7 +2977,7 @@ BEGIN
             clk_inv => '0',
             clken_mode => 1)
         PORT MAP(
-            clock => Net_18,
+            clock => Net_268,
             status_6 => open,
             status_5 => open,
             status_4 => open,
@@ -3181,7 +3181,7 @@ BEGIN
             clk_inv => '0',
             clken_mode => 1)
         PORT MAP(
-            clock => Net_114,
+            clock => Net_269,
             control_7 => \QuadDec_2:Cnt16:CounterUDB:control_7\,
             control_6 => \QuadDec_2:Cnt16:CounterUDB:control_6\,
             control_5 => \QuadDec_2:Cnt16:CounterUDB:control_5\,
@@ -3202,7 +3202,7 @@ BEGIN
             reset_inv => '0')
         PORT MAP(
             reset => \QuadDec_2:Net_1260\,
-            clock => Net_114,
+            clock => Net_269,
             status_6 => \QuadDec_2:Cnt16:CounterUDB:status_6\,
             status_5 => \QuadDec_2:Cnt16:CounterUDB:status_5\,
             status_4 => open,
@@ -3239,7 +3239,7 @@ BEGIN
             clk_inv => '0',
             clken_mode => 1)
         PORT MAP(
-            clock => Net_114,
+            clock => Net_269,
             cs_addr_2 => \QuadDec_2:Net_1251\,
             cs_addr_1 => \QuadDec_2:Cnt16:CounterUDB:count_enable\,
             cs_addr_0 => \QuadDec_2:Cnt16:CounterUDB:reload\,
@@ -3286,7 +3286,7 @@ BEGIN
             clk_inv => '0',
             clken_mode => 1)
         PORT MAP(
-            clock => Net_114,
+            clock => Net_269,
             cs_addr_2 => \QuadDec_2:Net_1251\,
             cs_addr_1 => \QuadDec_2:Cnt16:CounterUDB:count_enable\,
             cs_addr_0 => \QuadDec_2:Cnt16:CounterUDB:reload\,
@@ -3318,7 +3318,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:bQuadDec:quad_A_delayed_0\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => Net_130);
 
     \QuadDec_2:bQuadDec:quad_A_delayed_1\:macrocell
@@ -3329,7 +3329,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:bQuadDec:quad_A_delayed_1\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:bQuadDec:quad_A_delayed_0\);
 
     \QuadDec_2:bQuadDec:quad_A_delayed_2\:macrocell
@@ -3340,7 +3340,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:bQuadDec:quad_A_delayed_2\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:bQuadDec:quad_A_delayed_1\);
 
     \QuadDec_2:bQuadDec:quad_B_delayed_0\:macrocell
@@ -3351,7 +3351,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:bQuadDec:quad_B_delayed_0\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => Net_131);
 
     \QuadDec_2:bQuadDec:quad_B_delayed_1\:macrocell
@@ -3362,7 +3362,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:bQuadDec:quad_B_delayed_1\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:bQuadDec:quad_B_delayed_0\);
 
     \QuadDec_2:bQuadDec:quad_B_delayed_2\:macrocell
@@ -3373,7 +3373,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:bQuadDec:quad_B_delayed_2\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:bQuadDec:quad_B_delayed_1\);
 
     \QuadDec_2:bQuadDec:Stsreg\:statusicell
@@ -3384,7 +3384,7 @@ BEGIN
             clk_inv => '0',
             clken_mode => 1)
         PORT MAP(
-            clock => Net_114,
+            clock => Net_269,
             status_6 => open,
             status_5 => open,
             status_4 => open,
@@ -3769,7 +3769,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:Net_1251\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:Net_1251\,
             main_1 => \QuadDec_1:Net_1260\,
             main_2 => \QuadDec_1:bQuadDec:quad_A_filt\,
@@ -3787,7 +3787,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:Cnt16:CounterUDB:overflow_reg_i\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:Cnt16:CounterUDB:overflow\);
 
     \QuadDec_1:Cnt16:CounterUDB:underflow_reg_i\:macrocell
@@ -3798,7 +3798,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:Cnt16:CounterUDB:underflow_reg_i\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:Cnt16:CounterUDB:status_1\);
 
     \QuadDec_1:Net_1275\:macrocell
@@ -3809,7 +3809,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:Net_1275\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:Cnt16:CounterUDB:status_1\,
             main_1 => \QuadDec_1:Cnt16:CounterUDB:overflow\);
 
@@ -3821,7 +3821,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:Cnt16:CounterUDB:prevCompare\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:Cnt16:CounterUDB:cmp_out_i\);
 
     \QuadDec_1:Net_1251_split\:macrocell
@@ -3847,7 +3847,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:Cnt16:CounterUDB:count_stored_i\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:Net_1203\);
 
     \QuadDec_1:Net_1203\:macrocell
@@ -3858,7 +3858,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:Net_1203\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:Net_1260\,
             main_1 => \QuadDec_1:Net_1203\,
             main_2 => \QuadDec_1:bQuadDec:quad_A_filt\,
@@ -3875,7 +3875,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:bQuadDec:quad_A_filt\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:bQuadDec:quad_A_delayed_0\,
             main_1 => \QuadDec_1:bQuadDec:quad_A_delayed_1\,
             main_2 => \QuadDec_1:bQuadDec:quad_A_delayed_2\,
@@ -3889,7 +3889,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:bQuadDec:quad_B_filt\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:bQuadDec:quad_B_delayed_0\,
             main_1 => \QuadDec_1:bQuadDec:quad_B_delayed_1\,
             main_2 => \QuadDec_1:bQuadDec:quad_B_delayed_2\,
@@ -3903,7 +3903,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:Net_1260\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:Net_1260\,
             main_1 => \QuadDec_1:bQuadDec:error\,
             main_2 => \QuadDec_1:bQuadDec:state_1\,
@@ -3917,7 +3917,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:bQuadDec:error\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:Net_1260\,
             main_1 => \QuadDec_1:bQuadDec:quad_A_filt\,
             main_2 => \QuadDec_1:bQuadDec:quad_B_filt\,
@@ -3933,7 +3933,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:bQuadDec:state_1\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:Net_1260\,
             main_1 => \QuadDec_1:bQuadDec:quad_A_filt\,
             main_2 => \QuadDec_1:bQuadDec:quad_B_filt\,
@@ -3949,7 +3949,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_1:bQuadDec:state_0\,
-            clock_0 => Net_18,
+            clock_0 => Net_268,
             main_0 => \QuadDec_1:Net_1260\,
             main_1 => \QuadDec_1:bQuadDec:quad_A_filt\,
             main_2 => \QuadDec_1:bQuadDec:quad_B_filt\,
@@ -4216,7 +4216,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:Net_1251\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:Net_1251\,
             main_1 => \QuadDec_2:Net_1260\,
             main_2 => \QuadDec_2:bQuadDec:quad_A_filt\,
@@ -4234,7 +4234,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:Cnt16:CounterUDB:overflow_reg_i\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:Cnt16:CounterUDB:overflow\);
 
     \QuadDec_2:Cnt16:CounterUDB:underflow_reg_i\:macrocell
@@ -4245,7 +4245,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:Cnt16:CounterUDB:underflow_reg_i\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:Cnt16:CounterUDB:status_1\);
 
     \QuadDec_2:Net_1275\:macrocell
@@ -4256,7 +4256,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:Net_1275\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:Cnt16:CounterUDB:status_1\,
             main_1 => \QuadDec_2:Cnt16:CounterUDB:overflow\);
 
@@ -4268,7 +4268,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:Cnt16:CounterUDB:prevCompare\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:Cnt16:CounterUDB:cmp_out_i\);
 
     \QuadDec_2:Net_1251_split\:macrocell
@@ -4294,7 +4294,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:Cnt16:CounterUDB:count_stored_i\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:Net_1203\);
 
     \QuadDec_2:Net_1203\:macrocell
@@ -4305,7 +4305,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:Net_1203\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:Net_1260\,
             main_1 => \QuadDec_2:Net_1203\,
             main_2 => \QuadDec_2:bQuadDec:quad_A_filt\,
@@ -4322,7 +4322,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:bQuadDec:quad_A_filt\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:bQuadDec:quad_A_delayed_0\,
             main_1 => \QuadDec_2:bQuadDec:quad_A_delayed_1\,
             main_2 => \QuadDec_2:bQuadDec:quad_A_delayed_2\,
@@ -4336,7 +4336,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:bQuadDec:quad_B_filt\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:bQuadDec:quad_B_delayed_0\,
             main_1 => \QuadDec_2:bQuadDec:quad_B_delayed_1\,
             main_2 => \QuadDec_2:bQuadDec:quad_B_delayed_2\,
@@ -4350,7 +4350,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:Net_1260\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:Net_1260\,
             main_1 => \QuadDec_2:bQuadDec:error\,
             main_2 => \QuadDec_2:bQuadDec:state_1\,
@@ -4364,7 +4364,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:bQuadDec:error\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:Net_1260\,
             main_1 => \QuadDec_2:bQuadDec:quad_A_filt\,
             main_2 => \QuadDec_2:bQuadDec:quad_B_filt\,
@@ -4380,7 +4380,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:bQuadDec:state_1\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:Net_1260\,
             main_1 => \QuadDec_2:bQuadDec:quad_A_filt\,
             main_2 => \QuadDec_2:bQuadDec:quad_B_filt\,
@@ -4396,7 +4396,7 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => \QuadDec_2:bQuadDec:state_0\,
-            clock_0 => Net_114,
+            clock_0 => Net_269,
             main_0 => \QuadDec_2:Net_1260\,
             main_1 => \QuadDec_2:bQuadDec:quad_A_filt\,
             main_2 => \QuadDec_2:bQuadDec:quad_B_filt\,

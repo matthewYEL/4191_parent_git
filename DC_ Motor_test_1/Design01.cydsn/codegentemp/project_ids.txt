@@ -1,6 +1,6 @@
-D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\Design01.cyprj|147effa5-298f-4bef-ba5c-70d07d1ea1ec
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|e77d5af7-dd2e-45af-9256-07127c2b54b1
-C:\Users\ywlim\Documents\PSoC Creator\4.4\Downloads ( 4.4).cylib\Downloads ( 4.4).cyprj|30b22dc2-0a1b-4812-9378-c56f56ee9f49
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|a3b1f99f-21ef-46ac-b1e4-2af974d7e7cf
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|2b3c272f-56ac-4a9a-ae4f-ab6d07cf4b77
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|a46e4de3-0ba3-45a2-bbc8-2ab04c28c567
+D:\y3s1\ECE4191\project\github\DC_ Motor_test_1\Design01.cydsn\Design01.cyprj|393110ff-9b04-4920-963e-e7fefb42f495
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|20c2bf0d-ab4b-4274-9e89-30e92de3bb67
+C:\Users\ywlim\Documents\PSoC Creator\4.4\Downloads ( 4.4).cylib\Downloads ( 4.4).cyprj|8399cbc9-7518-4da7-8bfc-d24ad484d120
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|ce6c42d5-6109-4bc6-9de7-cfae85ec4f5c
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|4674eb00-5967-4569-8a5c-df4d27da25ee
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|2e0bc331-7cde-4e8b-98ed-a683d3a43496

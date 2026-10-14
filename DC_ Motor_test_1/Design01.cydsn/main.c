@@ -30,7 +30,7 @@ int cmd_code = 0;
  * This is not a camera acknowledgement; slow frames may require a longer wait.
  */
 #define CAMERA_SETTLE_MS 100u
-#define MOTOR_CONTROL_PERIOD_MS 100u
+#define MOTOR_CONTROL_PERIOD_MS 200u
 enum { CAMERA_SETTLING, CAMERA_WAIT_RESULT, CAMERA_READY, CAMERA_MOVING };
 static volatile uint8 camera_state = CAMERA_SETTLING;
 static volatile uint32 camera_ms = 0u;
@@ -43,17 +43,25 @@ static void camera_tick(void)
     camera_ms++;
 }
 
-#define PULSES_PER_GRID  1900
-#define PULSES_PER_DIAGONAL  2700
-#define PULSES_PER_45DEGREE  1300
-#define PULSES_PER_90DEGREE  2400
-#define PULSES_PER_135DEGREE  3800
-#define PULSES_PER_180DEGREE  5200
-#define PULSES_PER_225DEGREE  6470
-#define PULSES_PER_270DEGREE  7800
-#define PULSES_PER_315DEGREE  9200
-#define MASTER_PWM 230   /* fixed PWM for the master (reference) motor */
-#define KP 0.15          /* P-controller gain: corrects the slave motor's
+#define PULSES_PER_GRID  2220
+#define PULSES_PER_DIAGONAL  3200
+#define PULSES_PER_45DEGREE_LEFT 1300 //right
+#define PULSES_PER_45DEGREE_RIGHT  1200 //left
+#define PULSES_PER_90DEGREE_LEFT  2400
+#define PULSES_PER_135DEGREE_LEFT  3800
+#define PULSES_PER_180DEGREE_LEFT  5200
+#define PULSES_PER_225DEGREE_LEFT  6470
+#define PULSES_PER_270DEGREE_LEFT  7800
+#define PULSES_PER_315DEGREE_LEFT  9200
+#define PULSES_PER_90DEGREE_RIGHT  2400
+#define PULSES_PER_135DEGREE_RIGHT  3800
+#define PULSES_PER_180DEGREE_RIGHT  5200
+#define PULSES_PER_225DEGREE_RIGHT  6470
+#define PULSES_PER_270DEGREE_RIGHT  7800
+#define PULSES_PER_315DEGREE_RIGHT  9200
+
+#define MASTER_PWM 200   /* fixed PWM for the master (reference) motor */
+#define KP 0.3        /* P-controller gain: corrects the slave motor's
                           * PWM based on encoder-count error vs the master,
                           * so both wheels stay in sync and the robot
                           * drives straight instead of curving */
@@ -78,32 +86,64 @@ typedef struct {
 
 IfelseData if_data[30];
 
-int angle_to_pulses(int angle)
+int angle_to_pulses_rt(int angle)
 {
     angle = abs(angle);
 
     switch (angle)
     {
         case 45:
-            return PULSES_PER_45DEGREE;
+            return PULSES_PER_45DEGREE_RIGHT;
 
         case 90:
-            return PULSES_PER_90DEGREE;
+            return PULSES_PER_90DEGREE_RIGHT;
 
         case 135:
-            return PULSES_PER_135DEGREE;
+            return PULSES_PER_135DEGREE_RIGHT;
 
         case 180:
-            return PULSES_PER_180DEGREE;
+            return PULSES_PER_180DEGREE_RIGHT;
 
         case 225:
-            return PULSES_PER_225DEGREE;
+            return PULSES_PER_225DEGREE_RIGHT;
 
         case 270:
-            return PULSES_PER_270DEGREE;
+            return PULSES_PER_270DEGREE_RIGHT;
 
         case 315:
-            return PULSES_PER_315DEGREE;
+            return PULSES_PER_315DEGREE_RIGHT;
+
+        default:
+            return 0;
+    }
+}
+
+int angle_to_pulses_lt(int angle)
+{
+    angle = abs(angle);
+
+    switch (angle)
+    {
+        case 45:
+            return PULSES_PER_45DEGREE_LEFT;
+
+        case 90:
+            return PULSES_PER_90DEGREE_LEFT;
+
+        case 135:
+            return PULSES_PER_135DEGREE_LEFT;
+
+        case 180:
+            return PULSES_PER_180DEGREE_LEFT;
+
+        case 225:
+            return PULSES_PER_225DEGREE_LEFT;
+
+        case 270:
+            return PULSES_PER_270DEGREE_LEFT;
+
+        case 315:
+            return PULSES_PER_315DEGREE_LEFT;
 
         default:
             return 0;
@@ -167,11 +207,11 @@ static void play_vowel_sound(char letter)
 {
     switch (letter)
     {
-        case 'A': df_play_track(DF_TRACK_A); break;
-        case 'E': df_play_track(DF_TRACK_E); break;
-        case 'I': df_play_track(DF_TRACK_I); break;
-        case 'O': df_play_track(DF_TRACK_O); break;
-        case 'U': df_play_track(DF_TRACK_U); break;
+        case 'A': df_play_track(DF_TRACK_A); CyDelay(100); break;
+        case 'E': df_play_track(DF_TRACK_E); CyDelay(100); break;
+        case 'I': df_play_track(DF_TRACK_I); CyDelay(100); break;
+        case 'O': df_play_track(DF_TRACK_O); CyDelay(100); break;
+        case 'U': df_play_track(DF_TRACK_U); CyDelay(100); break;
         default: return;
     }
 }
@@ -276,10 +316,12 @@ int append_simple_command(TurtleCommand *queue, volatile int *count, int max_cou
         queue[*count].type = forward ? 'f' : 'b';
         queue[*count].param = forward ? -value : value;
     }
+
     else if (strcmp(cmd_name, "lt") == 0 || strcmp(cmd_name, "rt") == 0)
     {
-        int pulses = angle_to_pulses(value);
-
+        int pulses;
+        pulses = angle_to_pulses_rt(value);
+        
         if (pulses == 0)
         {
             /* angle not in the supported 45-degree table -> skip this command */
@@ -606,7 +648,7 @@ int compute_slave_pwm(int error)
 
     if (pwm_slave < 0)
     {
-        pwm_slave = 0;
+        pwm_slave = 180;
     }
 
     return pwm_slave;
@@ -1384,7 +1426,7 @@ int main(void)
     UART_1_Start();
     UART_2_Start();
     UART_3_Start();
-    df_set_volume(10);
+    df_set_volume(30);
     UART_2_PutString("UART2 READY\r\n");
     isr_1_StartEx(ISR_Handler_1);
     UART_1_PutString("START...........");
@@ -1655,9 +1697,9 @@ int main(void)
 
                 PWM_2_WriteCompare(MASTER_PWM);
                 PWM_1_WriteCompare(pwm_slave);
-
-                //uart_printf("M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
-                //            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
+                
+                uart_printf("M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
+                            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
 
                 if (relative_c2 >= target)
                 {
@@ -1771,7 +1813,7 @@ int main(void)
                 else
                 {
                     uart_printf("rt");
-                    advance_command_index(current_cmd->turn_delta_deg);
+                    advance_command_index(current_cmd->turn_delta_deg); 
                 }
                 break;
             }      
