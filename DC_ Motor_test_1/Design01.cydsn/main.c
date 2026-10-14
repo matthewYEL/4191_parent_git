@@ -10,6 +10,9 @@
  * ========================================
 */
 #include "project.h"
+/* Add two Digital Input Pin components with these names in TopDesign. */
+#include "LEFT.h"
+#include "RIGHT.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,7 +33,7 @@ int cmd_code = 0;
  * This is not a camera acknowledgement; slow frames may require a longer wait.
  */
 #define CAMERA_SETTLE_MS 100u
-#define MOTOR_CONTROL_PERIOD_MS 100u
+#define MOTOR_CONTROL_PERIOD_MS 200u
 enum { CAMERA_SETTLING, CAMERA_WAIT_RESULT, CAMERA_READY, CAMERA_MOVING };
 static volatile uint8 camera_state = CAMERA_SETTLING;
 static volatile uint32 camera_ms = 0u;
@@ -38,22 +41,41 @@ static uint32 camera_stop_ms = 0u;
 static int movement_steps_done = 0;
 static void begin_camera_scan(void);
 
+/* Set each level to the corresponding sensor's digital output on black. */
+#define IR_LEFT_BLACK_LEVEL  0u
+#define IR_RIGHT_BLACK_LEVEL 0u
+#define IR_STABLE_MS         5u
+static volatile uint8 forward_ir_active = 0u;
+static uint8 forward_ir_armed = 0u;
+static uint8 forward_ir_pending = 0u;
+static uint32 forward_ir_since_ms = 0u;
+static uint8 forward_ir_left_done = 0u;
+static uint8 forward_ir_right_done = 0u;
+
 static void camera_tick(void)
 {
     camera_ms++;
 }
 
-#define PULSES_PER_GRID  1900
-#define PULSES_PER_DIAGONAL  2700
-#define PULSES_PER_45DEGREE  1300
-#define PULSES_PER_90DEGREE  2400
-#define PULSES_PER_135DEGREE  3800
-#define PULSES_PER_180DEGREE  5200
-#define PULSES_PER_225DEGREE  6470
-#define PULSES_PER_270DEGREE  7800
-#define PULSES_PER_315DEGREE  9200
-#define MASTER_PWM 230   /* fixed PWM for the master (reference) motor */
-#define KP 0.15          /* P-controller gain: corrects the slave motor's
+#define PULSES_PER_GRID  2220
+#define PULSES_PER_DIAGONAL  3200
+#define PULSES_PER_45DEGREE_LEFT 1300 //right
+#define PULSES_PER_45DEGREE_RIGHT  1200 //left
+#define PULSES_PER_90DEGREE_LEFT  2400
+#define PULSES_PER_135DEGREE_LEFT  3800
+#define PULSES_PER_180DEGREE_LEFT  5200
+#define PULSES_PER_225DEGREE_LEFT  6470
+#define PULSES_PER_270DEGREE_LEFT  7800
+#define PULSES_PER_315DEGREE_LEFT  9200
+#define PULSES_PER_90DEGREE_RIGHT  2400
+#define PULSES_PER_135DEGREE_RIGHT  3800
+#define PULSES_PER_180DEGREE_RIGHT  5200
+#define PULSES_PER_225DEGREE_RIGHT  6470
+#define PULSES_PER_270DEGREE_RIGHT  7800
+#define PULSES_PER_315DEGREE_RIGHT  9200
+
+#define MASTER_PWM 200   /* fixed PWM for the master (reference) motor */
+#define KP 0.3        /* P-controller gain: corrects the slave motor's
                           * PWM based on encoder-count error vs the master,
                           * so both wheels stay in sync and the robot
                           * drives straight instead of curving */
@@ -78,32 +100,64 @@ typedef struct {
 
 IfelseData if_data[30];
 
-int angle_to_pulses(int angle)
+int angle_to_pulses_rt(int angle)
 {
     angle = abs(angle);
 
     switch (angle)
     {
         case 45:
-            return PULSES_PER_45DEGREE;
+            return PULSES_PER_45DEGREE_RIGHT;
 
         case 90:
-            return PULSES_PER_90DEGREE;
+            return PULSES_PER_90DEGREE_RIGHT;
 
         case 135:
-            return PULSES_PER_135DEGREE;
+            return PULSES_PER_135DEGREE_RIGHT;
 
         case 180:
-            return PULSES_PER_180DEGREE;
+            return PULSES_PER_180DEGREE_RIGHT;
 
         case 225:
-            return PULSES_PER_225DEGREE;
+            return PULSES_PER_225DEGREE_RIGHT;
 
         case 270:
-            return PULSES_PER_270DEGREE;
+            return PULSES_PER_270DEGREE_RIGHT;
 
         case 315:
-            return PULSES_PER_315DEGREE;
+            return PULSES_PER_315DEGREE_RIGHT;
+
+        default:
+            return 0;
+    }
+}
+
+int angle_to_pulses_lt(int angle)
+{
+    angle = abs(angle);
+
+    switch (angle)
+    {
+        case 45:
+            return PULSES_PER_45DEGREE_LEFT;
+
+        case 90:
+            return PULSES_PER_90DEGREE_LEFT;
+
+        case 135:
+            return PULSES_PER_135DEGREE_LEFT;
+
+        case 180:
+            return PULSES_PER_180DEGREE_LEFT;
+
+        case 225:
+            return PULSES_PER_225DEGREE_LEFT;
+
+        case 270:
+            return PULSES_PER_270DEGREE_LEFT;
+
+        case 315:
+            return PULSES_PER_315DEGREE_LEFT;
 
         default:
             return 0;
@@ -167,11 +221,11 @@ static void play_vowel_sound(char letter)
 {
     switch (letter)
     {
-        case 'A': df_play_track(DF_TRACK_A); break;
-        case 'E': df_play_track(DF_TRACK_E); break;
-        case 'I': df_play_track(DF_TRACK_I); break;
-        case 'O': df_play_track(DF_TRACK_O); break;
-        case 'U': df_play_track(DF_TRACK_U); break;
+        case 'A': df_play_track(DF_TRACK_A); CyDelay(100); break;
+        case 'E': df_play_track(DF_TRACK_E); CyDelay(100); break;
+        case 'I': df_play_track(DF_TRACK_I); CyDelay(100); break;
+        case 'O': df_play_track(DF_TRACK_O); CyDelay(100); break;
+        case 'U': df_play_track(DF_TRACK_U); CyDelay(100); break;
         default: return;
     }
 }
@@ -196,6 +250,7 @@ void uart_printf(const char *fmt, ...)
 /* stop both drive motors */
 void stop_motors(void)
 {
+    forward_ir_active = 0u;
     Motor_1_IN_1_Write(0);
     Motor_1_IN_2_Write(0);
     Motor_2_IN_3_Write(0);
@@ -267,18 +322,19 @@ int append_simple_command(TurtleCommand *queue, volatile int *count, int max_cou
 
     if (strcmp(cmd_name, "fd") == 0 || strcmp(cmd_name, "bk") == 0)
     {
-        /* Store the raw grid-step count (signed for direction). The
-         * actual pulse target depends on the heading at the moment
-         * this command is executed, so it's computed at runtime in
-         * main() instead of here. */
+        /* Store the raw grid-step count (signed for direction).
+         * Forward steps end on the IR line; backward pulse targets
+         * are computed from the heading at execution time in main(). */
         int forward = (cmd_name[0] == 'f');
 
         queue[*count].type = forward ? 'f' : 'b';
         queue[*count].param = forward ? -value : value;
     }
+
     else if (strcmp(cmd_name, "lt") == 0 || strcmp(cmd_name, "rt") == 0)
     {
-        int pulses = angle_to_pulses(value);
+        int pulses;
+        pulses = angle_to_pulses_rt(value);
 
         if (pulses == 0)
         {
@@ -335,8 +391,8 @@ int executing_if = 0;
  * Actual physical heading in degrees (0 = whatever direction the
  * turtle starts facing, increases clockwise). Updated at runtime,
  * only when an l/r command finishes executing - not when it's
- * parsed/queued. This is what fd/bk look at (at the moment they
- * execute) to decide PULSES_PER_GRID vs PULSES_PER_DIAGONAL, so it
+ * parsed/queued. This is what bk looks at (at the moment it
+ * executes) to decide PULSES_PER_GRID vs PULSES_PER_DIAGONAL, so it
  * stays correct even inside a while-loop body that turns by
  * different amounts (45/90/135/...) on every pass.
  */
@@ -344,64 +400,6 @@ float current_heading_deg = 0.0f;
 
 volatile int waiting_for_uart = 0;
 volatile int uart_msg_received = 0;
-
-/* =========================================================
- * EEPROM SAVE / RESUME STATE
- *
- * The command still enters through UART_1 / Bluetooth exactly as before.
- * Software copies the accepted UART command and execution checkpoint into
- * the PSoC 5LP internal EEPROM; EEPROM needs no external wiring.
- *
- * The EEPROM example project supplied with this project targets
- * CY8C5888LTI-LP097, which has 0x800 (2048) bytes of EEPROM.
- * Two 640-byte banks are used so the previous valid checkpoint survives
- * if power disappears while the new bank is being programmed.
- * ========================================================= */
-#define EE_MAGIC_0                 0x45u   /* 'E' */
-#define EE_MAGIC_1                 0x32u   /* '2' */
-#define EE_FORMAT_VERSION          2u
-#define EE_ROW_SIZE                16u
-#define EE_BANK_ROWS               40u
-#define EE_BANK_BYTES              (EE_BANK_ROWS * EE_ROW_SIZE)
-#define EE_BANK_A_FIRST_ROW        0u
-#define EE_BANK_B_FIRST_ROW        EE_BANK_ROWS
-#define EE_HEADER_BYTES            16u
-#define EE_PROGRAM_MAX             (sizeof(rx_buffer) - 1u)
-
-#if defined(CYDEV_EE_SIZE) && (CYDEV_EE_SIZE < (2u * EE_BANK_BYTES))
-#error "EEPROM checkpoint layout requires at least 1280 bytes of internal EEPROM"
-#endif
-
-/* Header offsets. Header row is written LAST as the commit marker. */
-#define EE_H_MAGIC0                0u
-#define EE_H_MAGIC1                1u
-#define EE_H_VERSION               2u
-#define EE_H_ACTIVE                3u
-#define EE_H_SEQ_LO                4u
-#define EE_H_SEQ_HI                5u
-#define EE_H_LEN_LO                6u
-#define EE_H_LEN_HI                7u
-#define EE_H_CRC_LO                8u
-#define EE_H_CRC_HI                9u
-
-#define EE_FLAG_EXEC_IF            0x01u
-#define EE_FLAG_EXEC_WHILE         0x02u
-#define EE_FLAG_WAIT_WHILE         0x04u
-#define EE_FLAG_IF_BRANCH_VALID    0x08u
-#define EE_FLAG_IF_BRANCH_TRUE     0x10u
-
-static volatile uint8 eeprom_save_requested = 0u;
-static uint8 eeprom_active_bank = 0xFFu;
-static uint16 eeprom_sequence = 0u;
-static uint8 eeprom_buffer[EE_BANK_BYTES];
-static char eeprom_program_text[sizeof(rx_buffer)] = {0};
-static uint8 eeprom_if_branch_valid = 0u;
-static uint8 eeprom_if_branch_true = 0u;
-
-static void request_eeprom_checkpoint(void);
-static void service_eeprom_checkpoint(void);
-static uint8 restore_eeprom_checkpoint(void);
-static uint8 rebuild_program_from_text(const char *source);
 
 //lookup function
 char* get_variable(char *var_name)
@@ -609,11 +607,6 @@ void advance_command_index(int heading_delta_deg)
     if (finished->type == 'f' || finished->type == 'b')
     {
         movement_steps_done++;
-
-        /* EEPROM: one full grid has been completed.  This is a safe
-         * checkpoint; the actual EEPROM write is deferred to main(). */
-        request_eeprom_checkpoint();
-
         if (movement_steps_done < abs(finished->param))
         {
             request_reset_start = 1;
@@ -632,7 +625,6 @@ void advance_command_index(int heading_delta_deg)
         if (if_cmd_idx >= if_cmd_count)
         {
             executing_if = 0;
-            eeprom_if_branch_valid = 0u;
             current_cmd_idx++;
             if (current_cmd_idx >= cmd_count) 
             {
@@ -656,10 +648,65 @@ void advance_command_index(int heading_delta_deg)
     }
 
     request_reset_start = 1;
+}
 
-    /* EEPROM: save completed turns, queue-index changes, IF completion,
-     * and the final IDLE state (cmd_count becomes zero). */
-    request_eeprom_checkpoint();
+/* Ignore the starting line until both sensors have seen white for 5 ms.
+ * Then each sensor immediately stops its own motor on the first black reading.
+ * Latch each arrival so a stopped motor stays stopped until the next step.
+ */
+static void check_forward_ir(void)
+{
+    uint8 interrupt_state = CyEnterCriticalSection();
+
+    if (forward_ir_active)
+    {
+        uint8 left_black = (LEFT_Read() == IR_LEFT_BLACK_LEVEL);
+        uint8 right_black = (RIGHT_Read() == IR_RIGHT_BLACK_LEVEL);
+        uint32 now = camera_ms;
+
+        if (!forward_ir_armed)
+        {
+            if (left_black || right_black)
+            {
+                forward_ir_pending = 0u;
+            }
+            else if (!forward_ir_pending)
+            {
+                forward_ir_pending = 1u;
+                forward_ir_since_ms = now;
+            }
+            else if ((uint32)(now - forward_ir_since_ms) >= IR_STABLE_MS)
+            {
+                forward_ir_pending = 0u;
+                forward_ir_armed = 1u;
+            }
+        }
+
+        if (forward_ir_armed)
+        {
+            if (left_black && !forward_ir_left_done)
+            {
+                forward_ir_left_done = 1u;
+                PWM_1_WriteCompare(0);
+                Motor_1_IN_1_Write(0);
+                Motor_1_IN_2_Write(0);
+            }
+            if (right_black && !forward_ir_right_done)
+            {
+                forward_ir_right_done = 1u;
+                PWM_2_WriteCompare(0);
+                Motor_2_IN_3_Write(0);
+                Motor_2_IN_4_Write(0);
+            }
+            if (forward_ir_left_done && forward_ir_right_done)
+            {
+                /* Both have arrived, even if their readings no longer match. */
+                advance_command_index(0);
+            }
+        }
+    }
+
+    CyExitCriticalSection(interrupt_state);
 }
 
 /* Proportional correction for the slave motor's PWM, clamped to 0-255 */
@@ -674,10 +721,47 @@ int compute_slave_pwm(int error)
 
     if (pwm_slave < 0)
     {
-        pwm_slave = 0;
+        pwm_slave = 180;
     }
 
     return pwm_slave;
+}
+
+/* Motor 1 is LEFT; motor 2 is RIGHT. Honour arrival latches on every PWM
+ * update so the slower control loop cannot restart an arrived wheel.
+ */
+static void drive_forward(int relative_c1, int relative_c2)
+{
+    uint8 interrupt_state = CyEnterCriticalSection();
+
+    if (camera_state == CAMERA_MOVING)
+    {
+        if (!forward_ir_active)
+        {
+            forward_ir_armed = 0u;
+            forward_ir_pending = 0u;
+            forward_ir_left_done = 0u;
+            forward_ir_right_done = 0u;
+            forward_ir_active = 1u;
+        }
+
+        /* While both wheels move, negative encoder counts increase in
+         * magnitude going forward. slave - master provides negative feedback.
+         * Once the right/master wheel stops, use fixed PWM for the remaining
+         * left wheel rather than correcting against a stationary reference.
+         */
+        int pwm_left = forward_ir_right_done ? MASTER_PWM
+                          : compute_slave_pwm(relative_c1 - relative_c2);
+
+        PWM_1_WriteCompare(forward_ir_left_done ? 0 : pwm_left);
+        PWM_2_WriteCompare(forward_ir_right_done ? 0 : MASTER_PWM);
+        Motor_1_IN_1_Write(0);
+        Motor_1_IN_2_Write(forward_ir_left_done ? 0 : 1);
+        Motor_2_IN_3_Write(0);
+        Motor_2_IN_4_Write(forward_ir_right_done ? 0 : 1);
+    }
+
+    CyExitCriticalSection(interrupt_state);
 }
 
 void parse_while_body(char *text)
@@ -705,682 +789,6 @@ void parse_while_body(char *text)
     }
 }
 
-/* -------------------------------------------------------------------------
- * Rebuild the parser structures from the original UART program after reboot.
- * This mirrors the existing UART parser but deliberately DOES NOT execute
- * MAKE or LOOKUP side effects.  Variable values are restored from EEPROM
- * after the structural parse is complete.
- * ------------------------------------------------------------------------- */
-static uint8 rebuild_program_from_text(const char *source)
-{
-    char work[sizeof(rx_buffer)];
-    char *p;
-
-    if (source == NULL)
-    {
-        return 0u;
-    }
-
-    strncpy(work, source, sizeof(work) - 1u);
-    work[sizeof(work) - 1u] = '\0';
-    p = work;
-
-    cmd_count = 0;
-    current_cmd_idx = 0;
-    while_cmd_count = 0;
-    while_cmd_idx = 0;
-    if_cmd_count = 0;
-    if_cmd_idx = 0;
-    executing_while = 0;
-    executing_if = 0;
-    waiting_for_uart = 0;
-    while_condition_valid = 0;
-    memset(if_data, 0, sizeof(if_data));
-    while_var_name[0] = '\0';
-    while_expected_value[0] = '\0';
-    while_body[0] = '\0';
-
-    while (*p != '\0' && cmd_count < 30)
-    {
-        while (*p == ' ') p++;
-        if (*p == '\0') break;
-
-        if (strncmp(p, "repeat", 6) == 0)
-        {
-            int rep_count;
-            p += 6;
-            while (*p == ' ') p++;
-            rep_count = atoi(p);
-            while (*p != ' ' && *p != '\0') p++;
-            while (*p == ' ') p++;
-
-            if (*p == '[')
-            {
-                char *end;
-                p++;
-                end = strchr(p, ']');
-                if (end != NULL)
-                {
-                    char inner_cmd_str[50];
-                    int len = (int)(end - p);
-                    int r;
-                    if (len >= (int)sizeof(inner_cmd_str))
-                        len = (int)sizeof(inner_cmd_str) - 1;
-                    strncpy(inner_cmd_str, p, (size_t)len);
-                    inner_cmd_str[len] = '\0';
-                    for (r = 0; r < rep_count && cmd_count < 30; r++)
-                    {
-                        char temp_str[50];
-                        strcpy(temp_str, inner_cmd_str);
-                        parse_repeat_content(temp_str);
-                    }
-                    p = end + 1;
-                }
-                else
-                {
-                    return 0u;
-                }
-            }
-        }
-        else if (strncmp(p, "make", 4) == 0)
-        {
-            /* Skip the MAKE name and value.  EEPROM restores the actual
-             * variable table after this structural parser finishes. */
-            char dummy[20];
-            p += 4;
-            while (*p == ' ') p++;
-            if (*p == '"') p++;
-            p = read_token(p, dummy, sizeof(dummy));
-            if (*p == '"') p++;
-            p = read_token(p, dummy, sizeof(dummy));
-        }
-        else if (*p == ':')
-        {
-            /* LOOKUP changes no execution state; skip the variable token. */
-            char dummy[20];
-            p++;
-            p = read_token(p, dummy, sizeof(dummy));
-        }
-        else if (strncmp(p, "ifelse", 6) == 0)
-        {
-            p += 6;
-            while (*p == ' ') p++;
-
-            if (*p == ':')
-            {
-                char var_name[20];
-                char expected_value[20];
-                int j = 0;
-                p++;
-                while (*p != ' ' && *p != '\0' && j < 19)
-                    var_name[j++] = *p++;
-                var_name[j] = '\0';
-
-                while (*p == ' ') p++;
-                if (*p == '=') p++;
-                while (*p == ' ') p++;
-                if (*p == '"') p++;
-
-                j = 0;
-                while (*p != ' ' && *p != '\0' && j < 19)
-                    expected_value[j++] = *p++;
-                expected_value[j] = '\0';
-                while (*p == ' ') p++;
-
-                if (*p == '[')
-                {
-                    char *true_start = p + 1;
-                    char *true_end = find_matching_bracket(p);
-                    if (true_end != NULL)
-                    {
-                        char true_cmd[30];
-                        int true_len = (int)(true_end - true_start);
-                        if (true_len >= (int)sizeof(true_cmd))
-                            true_len = (int)sizeof(true_cmd) - 1;
-                        strncpy(true_cmd, true_start, (size_t)true_len);
-                        true_cmd[true_len] = '\0';
-                        p = true_end + 1;
-                        while (*p == ' ') p++;
-
-                        if (*p == '[')
-                        {
-                            char *false_start = p + 1;
-                            char *false_end = find_matching_bracket(p);
-                            if (false_end != NULL)
-                            {
-                                char false_cmd[30];
-                                int false_len = (int)(false_end - false_start);
-                                if (false_len >= (int)sizeof(false_cmd))
-                                    false_len = (int)sizeof(false_cmd) - 1;
-                                strncpy(false_cmd, false_start, (size_t)false_len);
-                                false_cmd[false_len] = '\0';
-                                p = false_end + 1;
-
-                                if (cmd_count < 30)
-                                {
-                                    cmd_queue[cmd_count].type = 'i';
-                                    cmd_queue[cmd_count].param = 0;
-                                    cmd_queue[cmd_count].repeat_cnt = 1;
-                                    cmd_queue[cmd_count].turn_delta_deg = 0;
-                                    strcpy(if_data[cmd_count].var, var_name);
-                                    strcpy(if_data[cmd_count].expected, expected_value);
-                                    strcpy(if_data[cmd_count].true_cmd, true_cmd);
-                                    strcpy(if_data[cmd_count].false_cmd, false_cmd);
-                                    cmd_count++;
-                                }
-                            }
-                            else return 0u;
-                        }
-                    }
-                    else return 0u;
-                }
-            }
-        }
-        else if (strncmp(p, "while", 5) == 0)
-        {
-            p += 5;
-            while (*p == ' ') p++;
-
-            if (*p == ':')
-            {
-                int j = 0;
-                p++;
-                while (*p != ' ' && *p != '\0' && j < 19)
-                    while_var_name[j++] = *p++;
-                while_var_name[j] = '\0';
-            }
-
-            while (*p == ' ') p++;
-            if (*p == '=') p++;
-            while (*p == ' ') p++;
-            if (*p == '"') p++;
-
-            {
-                int j = 0;
-                while (*p != ' ' && *p != '\0' && j < 19)
-                    while_expected_value[j++] = *p++;
-                while_expected_value[j] = '\0';
-            }
-
-            while (*p == ' ') p++;
-            if (*p == '[')
-            {
-                char *body_start = p + 1;
-                char *body_end = find_matching_bracket(p);
-                if (body_end != NULL)
-                {
-                    int len = (int)(body_end - body_start);
-                    if (len >= (int)sizeof(while_body))
-                        len = (int)sizeof(while_body) - 1;
-                    strncpy(while_body, body_start, (size_t)len);
-                    while_body[len] = '\0';
-                    while_condition_valid = 1;
-
-                    if (cmd_count < 30)
-                    {
-                        cmd_queue[cmd_count].type = 'w';
-                        cmd_queue[cmd_count].param = 0;
-                        cmd_queue[cmd_count].repeat_cnt = 1;
-                        cmd_queue[cmd_count].turn_delta_deg = 0;
-                        cmd_count++;
-                    }
-                    parse_while_body(while_body);
-                    p = body_end + 1;
-                }
-                else return 0u;
-            }
-        }
-        else
-        {
-            char cmd_name[10];
-            char value_str[20];
-            int value = 1;
-            p = read_token(p, cmd_name, sizeof(cmd_name));
-            if (*p != '\0')
-            {
-                p = read_token(p, value_str, sizeof(value_str));
-                value = atoi(value_str);
-            }
-            append_simple_command(cmd_queue, &cmd_count, 30, cmd_name, value);
-        }
-    }
-
-    return 1u;
-}
-
-static uint16 ee_get_u16(const uint8 *p)
-{
-    return (uint16)p[0] | ((uint16)p[1] << 8);
-}
-
-static void ee_put_u16(uint8 *p, uint16 value)
-{
-    p[0] = (uint8)(value & 0xFFu);
-    p[1] = (uint8)((value >> 8) & 0xFFu);
-}
-
-static uint16 ee_crc16(const uint8 *data, uint16 length)
-{
-    uint16 crc = 0xFFFFu;
-    uint16 i;
-    uint8 bit;
-    for (i = 0u; i < length; i++)
-    {
-        crc ^= ((uint16)data[i] << 8);
-        for (bit = 0u; bit < 8u; bit++)
-            crc = (crc & 0x8000u) ? (uint16)((crc << 1) ^ 0x1021u)
-                                  : (uint16)(crc << 1);
-    }
-    return crc;
-}
-
-static uint8 ee_bounded_strlen(const char *s, uint8 max_len)
-{
-    uint8 n = 0u;
-    while (n < max_len && s[n] != '\0') n++;
-    return n;
-}
-
-static void request_eeprom_checkpoint(void)
-{
-    eeprom_save_requested = 1u;
-}
-
-static void eeprom_set_program_text(const char *text)
-{
-    if (text == NULL) return;
-    strncpy(eeprom_program_text, text, sizeof(eeprom_program_text) - 1u);
-    eeprom_program_text[sizeof(eeprom_program_text) - 1u] = '\0';
-}
-
-/* Build a compact snapshot.  Variables are length-prefixed, so normal use
- * (for example only :vowel) writes far fewer rows than the worst case. */
-static uint16 eeprom_build_snapshot(uint8 *data, uint16 sequence)
-{
-    uint16 offset = EE_HEADER_BYTES;
-    uint16 crc;
-    uint8 program_len;
-    uint8 runtime_flags = 0u;
-    uint8 active;
-    uint8 i;
-    int heading;
-
-    memset(data, 0, EE_BANK_BYTES);
-
-    if (cmd_count < 0 || cmd_count > 30 || current_cmd_idx < 0 || current_cmd_idx > 30 ||
-        movement_steps_done < 0 || movement_steps_done > 65535 ||
-        variable_count < 0 || variable_count > 10 ||
-        if_cmd_idx < 0 || if_cmd_idx > 255 || while_cmd_idx < 0 || while_cmd_idx > 255 ||
-        if_cmd_count < 0 || if_cmd_count > 255 || while_cmd_count < 0 || while_cmd_count > 255)
-    {
-        return 0u;
-    }
-
-    active = (cmd_count > 0 && current_cmd_idx < cmd_count) ? 1u : 0u;
-    program_len = ee_bounded_strlen(eeprom_program_text, (uint8)EE_PROGRAM_MAX);
-
-    data[EE_H_MAGIC0] = EE_MAGIC_0;
-    data[EE_H_MAGIC1] = EE_MAGIC_1;
-    data[EE_H_VERSION] = EE_FORMAT_VERSION;
-    data[EE_H_ACTIVE] = active;
-    ee_put_u16(&data[EE_H_SEQ_LO], sequence);
-
-    /* Payload fixed fields. */
-    if ((uint16)(offset + 14u + program_len) > EE_BANK_BYTES) return 0u;
-    data[offset++] = program_len;
-    memcpy(&data[offset], eeprom_program_text, program_len);
-    offset = (uint16)(offset + program_len);
-
-    data[offset++] = (uint8)((cmd_count < 0) ? 0 : cmd_count);
-    data[offset++] = (uint8)((current_cmd_idx < 0) ? 0 : current_cmd_idx);
-    ee_put_u16(&data[offset], (uint16)((movement_steps_done < 0) ? 0 : movement_steps_done));
-    offset += 2u;
-
-    heading = (int)(current_heading_deg + 0.5f);
-    while (heading < 0) heading += 360;
-    while (heading >= 360) heading -= 360;
-    ee_put_u16(&data[offset], (uint16)heading);
-    offset += 2u;
-
-    if (executing_if) runtime_flags |= EE_FLAG_EXEC_IF;
-    if (executing_while) runtime_flags |= EE_FLAG_EXEC_WHILE;
-    if (waiting_for_uart) runtime_flags |= EE_FLAG_WAIT_WHILE;
-    if (eeprom_if_branch_valid) runtime_flags |= EE_FLAG_IF_BRANCH_VALID;
-    if (eeprom_if_branch_true) runtime_flags |= EE_FLAG_IF_BRANCH_TRUE;
-    data[offset++] = runtime_flags;
-    data[offset++] = (uint8)((if_cmd_idx < 0) ? 0 : if_cmd_idx);
-    data[offset++] = (uint8)((while_cmd_idx < 0) ? 0 : while_cmd_idx);
-    data[offset++] = (uint8)((if_cmd_count < 0) ? 0 : if_cmd_count);
-    data[offset++] = (uint8)((while_cmd_count < 0) ? 0 : while_cmd_count);
-    data[offset++] = (uint8)((variable_count < 0) ? 0 : variable_count);
-
-    /* Persist the complete current variable table. */
-    for (i = 0u; i < (uint8)variable_count && i < 10u; i++)
-    {
-        uint8 name_len = ee_bounded_strlen(variables[i].name, 19u);
-        uint8 value_len = ee_bounded_strlen(variables[i].value, 19u);
-        uint16 needed = (uint16)(2u + name_len + value_len);
-        if ((uint16)(offset + needed) > EE_BANK_BYTES) return 0u;
-        data[offset++] = name_len;
-        data[offset++] = value_len;
-        memcpy(&data[offset], variables[i].name, name_len);
-        offset = (uint16)(offset + name_len);
-        memcpy(&data[offset], variables[i].value, value_len);
-        offset = (uint16)(offset + value_len);
-    }
-
-    ee_put_u16(&data[EE_H_LEN_LO], offset);
-    data[EE_H_CRC_LO] = 0u;
-    data[EE_H_CRC_HI] = 0u;
-    crc = ee_crc16(data, offset);
-    ee_put_u16(&data[EE_H_CRC_LO], crc);
-    return offset;
-}
-
-static uint8 eeprom_load_bank(uint8 first_row, uint8 *dest, uint16 *length_out, uint16 *seq_out)
-{
-    uint16 base = (uint16)first_row * EE_ROW_SIZE;
-    uint16 total_len;
-    uint16 stored_crc;
-    uint16 calc_crc;
-    uint16 i;
-
-    memset(dest, 0, EE_BANK_BYTES);
-    for (i = 0u; i < EE_HEADER_BYTES; i++)
-        dest[i] = EEPROM_ReadByte((uint16)(base + i));
-
-    if (dest[EE_H_MAGIC0] != EE_MAGIC_0 || dest[EE_H_MAGIC1] != EE_MAGIC_1 ||
-        dest[EE_H_VERSION] != EE_FORMAT_VERSION || dest[EE_H_ACTIVE] > 1u)
-        return 0u;
-
-    total_len = ee_get_u16(&dest[EE_H_LEN_LO]);
-    if (total_len < EE_HEADER_BYTES || total_len > EE_BANK_BYTES)
-        return 0u;
-
-    for (i = EE_HEADER_BYTES; i < total_len; i++)
-        dest[i] = EEPROM_ReadByte((uint16)(base + i));
-
-    stored_crc = ee_get_u16(&dest[EE_H_CRC_LO]);
-    dest[EE_H_CRC_LO] = 0u;
-    dest[EE_H_CRC_HI] = 0u;
-    calc_crc = ee_crc16(dest, total_len);
-    ee_put_u16(&dest[EE_H_CRC_LO], stored_crc);
-
-    if (stored_crc != calc_crc) return 0u;
-    *length_out = total_len;
-    *seq_out = ee_get_u16(&dest[EE_H_SEQ_LO]);
-    return 1u;
-}
-
-static uint8 eeprom_sequence_is_newer(uint16 a, uint16 b)
-{
-    return ((int16)(a - b) > 0) ? 1u : 0u;
-}
-
-static cystatus eeprom_write_bank(uint8 first_row, const uint8 *data, uint16 total_len)
-{
-    uint8 invalid_header[EE_ROW_SIZE] = {0u};
-    uint8 rows_to_write = (uint8)((total_len + EE_ROW_SIZE - 1u) / EE_ROW_SIZE);
-    uint8 row;
-    cystatus status;
-
-    status = EEPROM_Write(invalid_header, first_row);
-    if (status != CYRET_SUCCESS) return status;
-
-    for (row = 1u; row < rows_to_write; row++)
-    {
-        status = EEPROM_Write(&data[(uint16)row * EE_ROW_SIZE], (uint8)(first_row + row));
-        if (status != CYRET_SUCCESS) return status;
-    }
-
-    /* Header/commit marker is written last. */
-    return EEPROM_Write(data, first_row);
-}
-
-static void service_eeprom_checkpoint(void)
-{
-    uint8 interrupt_state;
-    uint16 total_len;
-    uint16 new_sequence;
-    uint8 target_bank;
-    uint8 first_row;
-    uint8 temp_status;
-    cystatus status;
-
-    if (eeprom_save_requested == 0u) return;
-
-    interrupt_state = CyEnterCriticalSection();
-    eeprom_save_requested = 0u;
-    new_sequence = (uint16)(eeprom_sequence + 1u);
-    total_len = eeprom_build_snapshot(eeprom_buffer, new_sequence);
-    CyExitCriticalSection(interrupt_state);
-
-    if (total_len == 0u)
-    {
-        UART_1_PutString("EEPROM SAVE ERROR: snapshot too large\r\n");
-        return;
-    }
-
-    temp_status = EEPROM_UpdateTemperature();
-    if (temp_status != 0u)
-    {
-        uart_printf("EEPROM ERROR: temperature update status=%u\r\n", (unsigned int)temp_status);
-        return;
-    }
-
-    target_bank = (eeprom_active_bank == 0u) ? 1u : 0u;
-    first_row = (target_bank == 0u) ? EE_BANK_A_FIRST_ROW : EE_BANK_B_FIRST_ROW;
-    status = eeprom_write_bank(first_row, eeprom_buffer, total_len);
-
-    if (status == CYRET_SUCCESS)
-    {
-        eeprom_active_bank = target_bank;
-        eeprom_sequence = new_sequence;
-        uart_printf("EEPROM SAVE OK: seq=%u bank=%c active=%u idx=%d/%d step=%d bytes=%u\r\n",
-                    (unsigned int)eeprom_sequence,
-                    target_bank == 0u ? 'A' : 'B',
-                    (unsigned int)eeprom_buffer[EE_H_ACTIVE],
-                    current_cmd_idx, cmd_count, movement_steps_done,
-                    (unsigned int)total_len);
-    }
-    else
-    {
-        uart_printf("EEPROM WRITE FAILED: status=%u; previous bank kept\r\n", (unsigned int)status);
-    }
-}
-
-static uint8 eeprom_restore_payload(const uint8 *data, uint16 total_len)
-{
-    uint16 offset = EE_HEADER_BYTES;
-    uint8 program_len;
-    uint8 saved_cmd_count;
-    uint8 saved_cmd_idx;
-    uint16 saved_steps;
-    uint16 saved_heading;
-    uint8 flags;
-    uint8 saved_if_idx;
-    uint8 saved_while_idx;
-    uint8 saved_if_count;
-    uint8 saved_while_count;
-    uint8 saved_var_count;
-    uint8 i;
-    uint8 active = data[EE_H_ACTIVE];
-
-    if (offset >= total_len) return 0u;
-    program_len = data[offset++];
-    if (program_len > EE_PROGRAM_MAX || (uint16)(offset + program_len + 13u) > total_len) return 0u;
-    memcpy(eeprom_program_text, &data[offset], program_len);
-    eeprom_program_text[program_len] = '\0';
-    offset = (uint16)(offset + program_len);
-
-    saved_cmd_count = data[offset++];
-    saved_cmd_idx = data[offset++];
-    saved_steps = ee_get_u16(&data[offset]); offset += 2u;
-    saved_heading = ee_get_u16(&data[offset]); offset += 2u;
-    flags = data[offset++];
-    saved_if_idx = data[offset++];
-    saved_while_idx = data[offset++];
-    saved_if_count = data[offset++];
-    saved_while_count = data[offset++];
-    saved_var_count = data[offset++];
-
-    if (saved_var_count > 10u) return 0u;
-
-    /* Reconstruct parser-owned queues/data from the exact original UART line. */
-    if (active != 0u)
-    {
-        if (program_len == 0u || rebuild_program_from_text(eeprom_program_text) == 0u)
-            return 0u;
-        if (cmd_count != (int)saved_cmd_count || saved_cmd_idx >= saved_cmd_count)
-            return 0u;
-    }
-    else
-    {
-        cmd_count = 0;
-        current_cmd_idx = 0;
-        movement_steps_done = 0;
-        executing_if = 0;
-        executing_while = 0;
-        waiting_for_uart = 0;
-    }
-
-    /* Restore variables exactly as they were at the checkpoint. */
-    variable_count = 0;
-    for (i = 0u; i < saved_var_count; i++)
-    {
-        uint8 name_len;
-        uint8 value_len;
-        if ((uint16)(offset + 2u) > total_len) return 0u;
-        name_len = data[offset++];
-        value_len = data[offset++];
-        if (name_len > 19u || value_len > 19u ||
-            (uint16)(offset + name_len + value_len) > total_len) return 0u;
-        memcpy(variables[i].name, &data[offset], name_len);
-        variables[i].name[name_len] = '\0';
-        offset = (uint16)(offset + name_len);
-        memcpy(variables[i].value, &data[offset], value_len);
-        variables[i].value[value_len] = '\0';
-        offset = (uint16)(offset + value_len);
-        variable_count++;
-    }
-
-    current_heading_deg = (float)(saved_heading % 360u);
-
-    if (active == 0u)
-    {
-        eeprom_if_branch_valid = 0u;
-        eeprom_if_branch_true = 0u;
-        uart_printf("EEPROM RESTORE: IDLE heading=%u vars=%u\r\n",
-                    (unsigned int)saved_heading, (unsigned int)saved_var_count);
-        return 1u;
-    }
-
-    current_cmd_idx = saved_cmd_idx;
-    movement_steps_done = (int)saved_steps;
-    executing_if = 0;
-    executing_while = 0;
-    waiting_for_uart = 0;
-    uart_msg_received = 0;
-    eeprom_if_branch_valid = (flags & EE_FLAG_IF_BRANCH_VALID) ? 1u : 0u;
-    eeprom_if_branch_true = (flags & EE_FLAG_IF_BRANCH_TRUE) ? 1u : 0u;
-
-    if ((flags & EE_FLAG_EXEC_IF) != 0u)
-    {
-        IfelseData *d;
-        char chosen_copy[30];
-        if ((flags & (EE_FLAG_EXEC_WHILE | EE_FLAG_WAIT_WHILE)) != 0u ||
-            eeprom_if_branch_valid == 0u || cmd_queue[current_cmd_idx].type != 'i') return 0u;
-        d = &if_data[current_cmd_idx];
-        strncpy(chosen_copy, eeprom_if_branch_true ? d->true_cmd : d->false_cmd,
-                sizeof(chosen_copy) - 1u);
-        chosen_copy[sizeof(chosen_copy) - 1u] = '\0';
-        if_cmd_count = 0;
-        parse_into(chosen_copy, if_cmd_queue, &if_cmd_count, IF_QUEUE_SIZE);
-        if (if_cmd_count != (int)saved_if_count || saved_if_idx >= saved_if_count) return 0u;
-        if_cmd_idx = saved_if_idx;
-        executing_if = 1;
-    }
-    else if ((flags & EE_FLAG_EXEC_WHILE) != 0u)
-    {
-        if ((flags & EE_FLAG_WAIT_WHILE) != 0u || cmd_queue[current_cmd_idx].type != 'w') return 0u;
-        if (while_cmd_count != (int)saved_while_count || saved_while_idx > saved_while_count) return 0u;
-        while_cmd_idx = saved_while_idx;
-        executing_while = 1;
-    }
-    else if ((flags & EE_FLAG_WAIT_WHILE) != 0u)
-    {
-        if (cmd_queue[current_cmd_idx].type != 'w') return 0u;
-        waiting_for_uart = 1;
-        executing_while = 0;
-        while_cmd_idx = saved_while_idx;
-    }
-    else
-    {
-        char t = cmd_queue[current_cmd_idx].type;
-        if ((t == 'f' || t == 'b') && movement_steps_done > abs(cmd_queue[current_cmd_idx].param))
-            return 0u;
-        if (t != 'f' && t != 'b') movement_steps_done = 0;
-    }
-
-    request_reset_start = 1;
-    uart_printf("EEPROM RESUME: idx=%d/%d type=%c step=%d heading=%u IF=%d WHILE=%d WAIT=%d\r\n",
-                current_cmd_idx, cmd_count, cmd_queue[current_cmd_idx].type,
-                movement_steps_done, (unsigned int)saved_heading,
-                executing_if, executing_while, waiting_for_uart);
-    return 1u;
-}
-
-static uint8 restore_eeprom_checkpoint(void)
-{
-    uint8 valid_a, valid_b;
-    uint16 len_a = 0u, len_b = 0u;
-    uint16 seq_a = 0u, seq_b = 0u;
-    uint8 chosen_bank;
-    uint8 first_row;
-    uint16 chosen_len, chosen_seq;
-
-    valid_a = eeprom_load_bank(EE_BANK_A_FIRST_ROW, eeprom_buffer, &len_a, &seq_a);
-    valid_b = eeprom_load_bank(EE_BANK_B_FIRST_ROW, eeprom_buffer, &len_b, &seq_b);
-
-    if (valid_a == 0u && valid_b == 0u)
-    {
-        eeprom_active_bank = 0xFFu;
-        eeprom_sequence = 0u;
-        UART_1_PutString("EEPROM: no valid checkpoint (fresh start)\r\n");
-        return 0u;
-    }
-
-    if (valid_a != 0u && valid_b == 0u) chosen_bank = 0u;
-    else if (valid_a == 0u && valid_b != 0u) chosen_bank = 1u;
-    else chosen_bank = eeprom_sequence_is_newer(seq_b, seq_a) ? 1u : 0u;
-
-    first_row = (chosen_bank == 0u) ? EE_BANK_A_FIRST_ROW : EE_BANK_B_FIRST_ROW;
-    if (eeprom_load_bank(first_row, eeprom_buffer, &chosen_len, &chosen_seq) == 0u)
-        return 0u;
-
-    eeprom_active_bank = chosen_bank;
-    eeprom_sequence = chosen_seq;
-
-    if (eeprom_restore_payload(eeprom_buffer, chosen_len) == 0u)
-    {
-        cmd_count = 0;
-        current_cmd_idx = 0;
-        movement_steps_done = 0;
-        executing_if = 0;
-        executing_while = 0;
-        waiting_for_uart = 0;
-        request_reset_start = 0;
-        eeprom_if_branch_valid = 0u;
-        eeprom_if_branch_true = 0u;
-        UART_1_PutString("EEPROM RESTORE REJECTED: corrupt/inconsistent state\r\n");
-        return 0u;
-    }
-
-    uart_printf("EEPROM BANK %c seq=%u restored\r\n",
-                chosen_bank == 0u ? 'A' : 'B', (unsigned int)eeprom_sequence);
-    return eeprom_buffer[EE_H_ACTIVE] ? 1u : 0u;
-}
-
 CY_ISR(ISR_Handler_1)
 {
     Rx = UART_1_GetChar();
@@ -1398,7 +806,6 @@ CY_ISR(ISR_Handler_1)
             rx_buffer[rx_index] = '\0';
 
             char *p = rx_buffer;
-            int is_lookup_command = (p[0] == ':');
             
             /* =========================
                EMERGENCY STOP
@@ -1413,11 +820,6 @@ CY_ISR(ISR_Handler_1)
                 cmd_count = 0;
                 current_cmd_idx = 0;
 
-                /* Emergency stop is intentionally independent of EEPROM.
-                 * Cancel a not-yet-written checkpoint request so this STOP
-                 * command does not modify the last committed power-loss save. */
-                eeprom_save_requested = 0u;
-
                 while_cmd_count = 0;
                 while_cmd_idx = 0;
                 executing_while = 0;
@@ -1428,6 +830,7 @@ CY_ISR(ISR_Handler_1)
 
                 waiting_for_uart = 0;
                 uart_msg_received = 0;
+                movement_steps_done = 0;
 
                 request_reset_start = 0;   /* not moving, nothing to reset a baseline for */
                 camera_state = CAMERA_READY;   /* ready to accept the next command immediately */
@@ -1963,23 +1366,7 @@ CY_ISR(ISR_Handler_1)
                                 cmd_queue[j].repeat_cnt);
                 }
 
-                /* EEPROM: preserve the exact UART1/Bluetooth program text.
-                 * The parser structures can therefore be reconstructed after
-                 * a complete power loss, including REPEAT/IFELSE/WHILE syntax. */
-                eeprom_set_program_text(rx_buffer);
-                eeprom_if_branch_valid = 0u;
-                eeprom_if_branch_true = 0u;
-                request_eeprom_checkpoint();
-
                 request_reset_start = 1;
-            }
-            else if (is_make_command || is_lookup_command)
-            {
-                /* MAKE and LOOKUP have no motor queue, but the exact UART line
-                 * can still be retained. MAKE also persists the variable table;
-                 * LOOKUP has no execution state to resume after reboot. */
-                eeprom_set_program_text(rx_buffer);
-                request_eeprom_checkpoint();
             }
             rx_index = 0;
         }
@@ -2150,16 +1537,7 @@ int main(void)
     UART_1_Start();
     UART_2_Start();
     UART_3_Start();
-
-    /* EEPROM is internal to the PSoC 5LP: no jumper wires or bus pins. */
-    EEPROM_Start();
-    CyDelayUs(10u);
-    if (EEPROM_UpdateTemperature() != 0u)
-    {
-        UART_1_PutString("EEPROM WARNING: temperature update failed\r\n");
-    }
-
-    df_set_volume(10);
+    df_set_volume(30);
     UART_2_PutString("UART2 READY\r\n");
     isr_1_StartEx(ISR_Handler_1);
     UART_1_PutString("START...........");
@@ -2186,19 +1564,12 @@ int main(void)
     CySysTickStart();
     CySysTickSetCallback(0u, camera_tick);
     begin_camera_scan();
-
-    /* Restore the most recent valid EEPROM checkpoint.  Camera settling
-     * still completes before any restored movement is allowed to run. */
-    (void)restore_eeprom_checkpoint();
-
     uint32 last_motor_update_ms = camera_ms;
     
     for(;;)
     {  
-        /* Perform deferred EEPROM writes outside UART ISR / motor code. */
-        service_eeprom_checkpoint();
-
         /* Place your application code here. */
+        check_forward_ir();
         check_camera_uart();
         if (camera_state == CAMERA_SETTLING || camera_state == CAMERA_WAIT_RESULT)
         {
@@ -2224,7 +1595,6 @@ int main(void)
                 while_cmd_idx = 0;
                 executing_while = 1;
                 request_reset_start = 1;
-                request_eeprom_checkpoint();
             }
             else
             {
@@ -2240,7 +1610,6 @@ int main(void)
 
                 uart_printf("AFTER WHILE: idx=%d count=%d\r\n",
                             current_cmd_idx, cmd_count);
-                request_eeprom_checkpoint();
             }
 
             continue;
@@ -2284,7 +1653,6 @@ int main(void)
             if (!uart_msg_received) begin_camera_scan();
 
             UART_1_PutString("WAITING FOR UART...\r\n");
-            request_eeprom_checkpoint();
 
             continue;
         }
@@ -2361,10 +1729,7 @@ int main(void)
                 {
                     executing_if = 1;
                     if_cmd_idx = 0;
-                    eeprom_if_branch_valid = 1u;
-                    eeprom_if_branch_true = condition ? 1u : 0u;
                     request_reset_start = 1;
-                    request_eeprom_checkpoint();
                 }
                 else
                 {
@@ -2375,8 +1740,6 @@ int main(void)
                         cmd_count = 0;
                     }
                     request_reset_start = 1;
-                    eeprom_if_branch_valid = 0u;
-                    request_eeprom_checkpoint();
                 }
             }
             break;
@@ -2399,7 +1762,6 @@ int main(void)
                     while_cmd_idx = 0;
                     executing_while = 1;
                     request_reset_start = 1;
-                    request_eeprom_checkpoint();
                 }
                 else
                 {
@@ -2413,58 +1775,14 @@ int main(void)
                         current_cmd_idx = 0;
                         cmd_count = 0;
                     }
-                    request_reset_start = 1;
-                    request_eeprom_checkpoint();
                 }
             }
             break;
             break;
             case 'f'://forward
             {
-                /* param holds a signed grid-step count; pick the pulse
-                 * count per step from the *current* heading so this
-                 * stays correct across repeated while-loop passes. */
-                int pulses_per_step = heading_is_diagonal(current_heading_deg)
-                                           ? PULSES_PER_DIAGONAL
-                                           : PULSES_PER_GRID;
-                /* One grid per segment; advance_command_index tracks the rest. */
-                int target = (current_cmd->param < 0 ? -1 : 1) * pulses_per_step;
-
-                /*
-                 * P-control (KP) keeps the two wheels' encoder counts
-                 * in sync so the robot drives straight: master motor
-                 * runs at a fixed MASTER_PWM, slave motor's PWM is
-                 * nudged up/down by KP * error.
-                 *
-                 * Forward motion drives relative_c2 (and relative_c1)
-                 * DOWN toward a negative target, so "ahead" means
-                 * "more negative". error = slave - master: if slave
-                 * has gone more negative than master (slave ahead),
-                 * error < 0 -> slave PWM decreases (slow down); if
-                 * slave lags (less negative than master), error > 0
-                 * -> slave PWM increases (speed up). Negative feedback.
-                 */
-                int error = relative_c1 - relative_c2;
-                int pwm_slave = compute_slave_pwm(error);
-
-                PWM_2_WriteCompare(MASTER_PWM);
-                PWM_1_WriteCompare(pwm_slave);
-
-                //uart_printf("M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
-                //            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
-
-                if (relative_c2 >= target)
-                {
-                    Motor_1_IN_1_Write(0);
-                    Motor_1_IN_2_Write(1);
-                    Motor_2_IN_3_Write(0);
-                    Motor_2_IN_4_Write(1);
-                }
-                else
-                {
-                    uart_printf("fd 1");
-                    advance_command_index(0);
-                }
+                /* Avoid blocking debug prints while polling for each arrival. */
+                drive_forward(relative_c1, relative_c2);
             }
             break;
             case 'l'://turn left
