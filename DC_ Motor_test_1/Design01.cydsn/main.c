@@ -42,8 +42,8 @@ static int movement_steps_done = 0;
 static void begin_camera_scan(void);
 
 /* Set each level to the corresponding sensor's digital output on black. */
-#define IR_LEFT_BLACK_LEVEL  0u
-#define IR_RIGHT_BLACK_LEVEL 0u
+#define IR_LEFT_BLACK_LEVEL  1u
+#define IR_RIGHT_BLACK_LEVEL 1u
 #define IR_STABLE_MS         5u
 static volatile uint8 forward_ir_active = 0u;
 static uint8 forward_ir_armed = 0u;
@@ -51,6 +51,14 @@ static uint8 forward_ir_pending = 0u;
 static uint32 forward_ir_since_ms = 0u;
 static uint8 forward_ir_left_done = 0u;
 static uint8 forward_ir_right_done = 0u;
+
+/* Separate reverse state keeps the working forward detection unchanged. */
+static volatile uint8 backward_ir_active = 0u;
+static uint8 backward_ir_armed = 0u;
+static uint8 backward_ir_pending = 0u;
+static uint32 backward_ir_since_ms = 0u;
+static uint8 backward_ir_left_done = 0u;
+static uint8 backward_ir_right_done = 0u;
 
 static void camera_tick(void)
 {
@@ -251,6 +259,7 @@ void uart_printf(const char *fmt, ...)
 void stop_motors(void)
 {
     forward_ir_active = 0u;
+    backward_ir_active = 0u;
     Motor_1_IN_1_Write(0);
     Motor_1_IN_2_Write(0);
     Motor_2_IN_3_Write(0);
@@ -323,8 +332,8 @@ int append_simple_command(TurtleCommand *queue, volatile int *count, int max_cou
     if (strcmp(cmd_name, "fd") == 0 || strcmp(cmd_name, "bk") == 0)
     {
         /* Store the raw grid-step count (signed for direction).
-         * Forward steps end on the IR line; backward pulse targets
-         * are computed from the heading at execution time in main(). */
+         * Forward and backward steps both end at the next IR line
+         * encountered in the commanded direction. */
         int forward = (cmd_name[0] == 'f');
 
         queue[*count].type = forward ? 'f' : 'b';
@@ -391,10 +400,8 @@ int executing_if = 0;
  * Actual physical heading in degrees (0 = whatever direction the
  * turtle starts facing, increases clockwise). Updated at runtime,
  * only when an l/r command finishes executing - not when it's
- * parsed/queued. This is what bk looks at (at the moment it
- * executes) to decide PULSES_PER_GRID vs PULSES_PER_DIAGONAL, so it
- * stays correct even inside a while-loop body that turns by
- * different amounts (45/90/135/...) on every pass.
+ * parsed/queued. Forward and backward grid steps use IR line detection
+ * for their stopping positions rather than heading-based pulse targets.
  */
 float current_heading_deg = 0.0f;
 
@@ -709,6 +716,64 @@ static void check_forward_ir(void)
     CyExitCriticalSection(interrupt_state);
 }
 
+/* With the same fixed sensor positions, bk moves to the previous line.
+ * Ignore the starting line until both sensors see white for 5 ms, then
+ * stop each reversing motor immediately when its own sensor sees black.
+ */
+static void check_backward_ir(void)
+{
+    uint8 interrupt_state = CyEnterCriticalSection();
+
+    if (backward_ir_active)
+    {
+        uint8 left_black = (LEFT_Read() == IR_LEFT_BLACK_LEVEL);
+        uint8 right_black = (RIGHT_Read() == IR_RIGHT_BLACK_LEVEL);
+        uint32 now = camera_ms;
+
+        if (!backward_ir_armed)
+        {
+            if (left_black || right_black)
+            {
+                backward_ir_pending = 0u;
+            }
+            else if (!backward_ir_pending)
+            {
+                backward_ir_pending = 1u;
+                backward_ir_since_ms = now;
+            }
+            else if ((uint32)(now - backward_ir_since_ms) >= IR_STABLE_MS)
+            {
+                backward_ir_pending = 0u;
+                backward_ir_armed = 1u;
+            }
+        }
+
+        if (backward_ir_armed)
+        {
+            if (left_black && !backward_ir_left_done)
+            {
+                backward_ir_left_done = 1u;
+                PWM_1_WriteCompare(0);
+                Motor_1_IN_1_Write(0);
+                Motor_1_IN_2_Write(0);
+            }
+            if (right_black && !backward_ir_right_done)
+            {
+                backward_ir_right_done = 1u;
+                PWM_2_WriteCompare(0);
+                Motor_2_IN_3_Write(0);
+                Motor_2_IN_4_Write(0);
+            }
+            if (backward_ir_left_done && backward_ir_right_done)
+            {
+                advance_command_index(0);
+            }
+        }
+    }
+
+    CyExitCriticalSection(interrupt_state);
+}
+
 /* Proportional correction for the slave motor's PWM, clamped to 0-255 */
 int compute_slave_pwm(int error)
 {
@@ -759,6 +824,40 @@ static void drive_forward(int relative_c1, int relative_c2)
         Motor_1_IN_2_Write(forward_ir_left_done ? 0 : 1);
         Motor_2_IN_3_Write(0);
         Motor_2_IN_4_Write(forward_ir_right_done ? 0 : 1);
+    }
+
+    CyExitCriticalSection(interrupt_state);
+}
+
+/* Reverse has positive encoder travel, so master - slave gives the
+ * correction sign needed to slow an ahead left wheel and speed up a
+ * lagging one. Once either side arrives, honour its stop latch.
+ */
+static void drive_backward(int relative_c1, int relative_c2)
+{
+    uint8 interrupt_state = CyEnterCriticalSection();
+
+    if (camera_state == CAMERA_MOVING)
+    {
+        if (!backward_ir_active)
+        {
+            backward_ir_armed = 0u;
+            backward_ir_pending = 0u;
+            backward_ir_left_done = 0u;
+            backward_ir_right_done = 0u;
+            backward_ir_active = 1u;
+        }
+
+        /* Do not correct against the right/master wheel after it stops. */
+        int pwm_left = backward_ir_right_done ? MASTER_PWM
+                          : compute_slave_pwm(relative_c2 - relative_c1);
+
+        PWM_1_WriteCompare(backward_ir_left_done ? 0 : pwm_left);
+        PWM_2_WriteCompare(backward_ir_right_done ? 0 : MASTER_PWM);
+        Motor_1_IN_1_Write(backward_ir_left_done ? 0 : 1);
+        Motor_1_IN_2_Write(0);
+        Motor_2_IN_3_Write(backward_ir_right_done ? 0 : 1);
+        Motor_2_IN_4_Write(0);
     }
 
     CyExitCriticalSection(interrupt_state);
@@ -1570,6 +1669,7 @@ int main(void)
     {  
         /* Place your application code here. */
         check_forward_ir();
+        check_backward_ir();
         check_camera_uart();
         if (camera_state == CAMERA_SETTLING || camera_state == CAMERA_WAIT_RESULT)
         {
@@ -1821,36 +1921,8 @@ int main(void)
             }
             case 'b'://backward
             {
-                /* param holds a signed grid-step count; pick the pulse
-                 * count per step from the *current* heading, same as
-                 * the 'f' case above. */
-                int pulses_per_step = heading_is_diagonal(current_heading_deg)
-                                           ? PULSES_PER_DIAGONAL
-                                           : PULSES_PER_GRID;
-                /* One grid per segment; advance_command_index tracks the rest. */
-                int target = (current_cmd->param < 0 ? -1 : 1) * pulses_per_step;
-
-                int error = relative_c2 - relative_c1;
-                int pwm_slave = compute_slave_pwm(error);
-
-                PWM_2_WriteCompare(MASTER_PWM);
-                PWM_1_WriteCompare(pwm_slave);
-
-                //uart_printf("M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
-                //            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
-
-                if (relative_c2 <= target)
-                {
-                    Motor_1_IN_1_Write(1);
-                    Motor_1_IN_2_Write(0);
-                    Motor_2_IN_3_Write(1);
-                    Motor_2_IN_4_Write(0);
-                }
-                else
-                {
-                    uart_printf("bk 1");
-                    advance_command_index(0);
-                }
+                /* Each reverse grid ends using the fixed LEFT/RIGHT sensors. */
+                drive_backward(relative_c1, relative_c2);
                 break;
             }
             case 'r'://turn right
