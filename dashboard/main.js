@@ -2,7 +2,8 @@
 
 import { connectToRobot, registerDataHandler } from './bluetooth.js';
 import { initGrid, executeLogoCommands, clearTrail } from './grid.js';
-import { openLastGradeModal } from './grid.js';
+import { openLastGradeModal, loadTemplate } from './grid.js';
+import { TEMPLATES } from './templates.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log("🚀 [MAIN] Starting single-page dashboard...");
@@ -130,6 +131,44 @@ document.addEventListener('DOMContentLoaded', () => {
   // 7. Reset Trail Listener
   if (resetTrailBtn) {
     resetTrailBtn.addEventListener('click', clearTrail);
+  }
+
+  // 8. Template Picker
+  const templateSelect = document.getElementById('templateSelect');
+  const loadTemplateBtn = document.getElementById('loadTemplateBtn');
+  const templateInfo = document.getElementById('templateInfo');
+  const fillSolutionBtn = document.getElementById('fillSolutionBtn');
+
+  if (templateSelect) {
+    TEMPLATES.forEach(t => {
+      templateSelect.appendChild(new Option(t.robotOnly ? `${t.name} 🤖` : t.name, t.id));
+    });
+
+    const selectedTemplate = () => TEMPLATES.find(t => t.id === templateSelect.value);
+    const showInfo = () => {
+      const t = selectedTemplate();
+      if (!t || !templateInfo) return;
+      templateInfo.innerText = t.goal + (t.robotOnly
+        ? '\n⚠️ Robot only: the simulator cannot grade repeat/while/ifelse.'
+        : '');
+    };
+    templateSelect.addEventListener('change', showInfo);
+    showInfo();
+
+    if (loadTemplateBtn) {
+      loadTemplateBtn.addEventListener('click', () => {
+        const t = selectedTemplate();
+        if (!t) return;
+        loadTemplate(t);
+        if (logoInput) logoInput.value = '';
+      });
+    }
+    if (fillSolutionBtn) {
+      fillSolutionBtn.addEventListener('click', () => {
+        const t = selectedTemplate();
+        if (t && logoInput) logoInput.value = t.solution;
+      });
+    }
   }
 });
 

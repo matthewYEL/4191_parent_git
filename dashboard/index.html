@@ -48,6 +48,17 @@
         Status: Disconnected
       </div>
 
+      <!-- Preset Boards (data in templates.js) -->
+      <div class="template-panel">
+        <label for="templateSelect">📚 Load Template</label>
+        <div style="display: flex; gap: 8px; margin-top: 5px;">
+          <select id="templateSelect" class="item-select" style="flex: 1;"></select>
+          <button id="loadTemplateBtn" class="btn-mini btn-secondary">Load</button>
+        </div>
+        <p id="templateInfo" class="template-info"></p>
+        <button id="fillSolutionBtn" class="btn-mini btn-secondary">Show Solution in Logo Box</button>
+      </div>
+
       <!-- Category Tracking Badges with Individual Clear Buttons -->
       <div class="category-panel">
         <div class="coord-badge">
@@ -165,6 +176,6 @@
   </div>
 
   <!-- NOTICE: type="module" allows ES6 imports in main.js -->
-  <script type="module" src="main.js?v=1.0.9"></script>
+  <script type="module" src="main.js?v=1.0.10"></script>
 </body>
 </html>

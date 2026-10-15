@@ -334,10 +334,15 @@ function parseAndPlace() {
     return;
   }
 
-  const col = match[1];
-  const row = parseInt(match[2], 10);
-  const key = `${col}${row}`;
-  const selectedType = itemSelect.value;
+  const key = `${match[1]}${parseInt(match[2], 10)}`;
+  placeItem(key, itemSelect.value);
+  updateUI();
+}
+
+// Place one item (start/dest/obstacle/vowel) at a key like "B14"
+function placeItem(key, selectedType) {
+  const col = key[0];
+  const row = key.slice(1);
 
   if (boardState[key]) {
     removeCoordinate(key);
@@ -371,8 +376,41 @@ function parseAndPlace() {
   } else if (selectedType === 'dest') {
     destCoord = key;
   }
+}
 
+// Load a preset board from templates.js, replacing the current board.
+export function loadTemplate(t) {
+  clearEntireGrid();
+  placeItem(t.start, 'start');
+  if (t.dest) placeItem(t.dest, 'dest');
+  (t.obstacles || []).forEach(key => placeItem(key, 'obstacle'));
+  Object.entries(t.vowels || {}).forEach(([vowel, key]) => placeItem(key, vowel));
+
+  startDir = t.dir;
+  if (startDirSelect) startDirSelect.value = String(t.dir);
+  syncRobotToStart();
+
+  setConstraints(t.include || [], t.exclude || []);
   updateUI();
+}
+
+// Reset all Must Include / Must Exclude boxes, then tick the template's ones.
+// Dispatching 'change' reuses the mutual-exclusion logic in main.js.
+function setConstraints(include, exclude) {
+  const boxes = document.querySelectorAll('.checkbox-row-wrapper input[type="checkbox"]');
+  boxes.forEach(box => {
+    box.checked = false;
+    box.disabled = false;
+    const label = box.closest('.print-checkbox-item');
+    if (label) label.classList.remove('disabled-item');
+  });
+  boxes.forEach(box => {
+    const wanted = box.classList.contains('cross-checkbox') ? exclude : include;
+    if (wanted.includes(box.dataset.command)) {
+      box.checked = true;
+      box.dispatchEvent(new Event('change'));
+    }
+  });
 }
 
 function clearCategory(category) {

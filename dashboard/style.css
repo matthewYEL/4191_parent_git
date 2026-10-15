@@ -156,6 +156,25 @@ select {
   text-align: left;
 }
 
+/* Template Picker */
+.template-panel {
+  text-align: left;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.template-panel select {
+  font-weight: normal;
+}
+
+.template-info {
+  font-weight: normal;
+  color: #475569;
+  white-space: pre-line;
+  margin: 6px 0;
+}
+
 /* Item Selection Dropdown */
 .item-select {
   padding: 8px;
