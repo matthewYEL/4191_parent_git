@@ -10,6 +10,9 @@
  * ========================================
 */
 #include "project.h"
+/* Add two Digital Input Pin components with these names in TopDesign. */
+#include "LEFT.h"
+#include "RIGHT.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,7 +33,7 @@ int cmd_code = 0;
  * This is not a camera acknowledgement; slow frames may require a longer wait.
  */
 #define CAMERA_SETTLE_MS 100u
-#define MOTOR_CONTROL_PERIOD_MS 100u
+#define MOTOR_CONTROL_PERIOD_MS 200u
 enum { CAMERA_SETTLING, CAMERA_WAIT_RESULT, CAMERA_READY, CAMERA_MOVING };
 static volatile uint8 camera_state = CAMERA_SETTLING;
 static volatile uint32 camera_ms = 0u;
@@ -38,22 +41,41 @@ static uint32 camera_stop_ms = 0u;
 static int movement_steps_done = 0;
 static void begin_camera_scan(void);
 
+/* Set each level to the corresponding sensor's digital output on black. */
+#define IR_LEFT_BLACK_LEVEL  0u
+#define IR_RIGHT_BLACK_LEVEL 0u
+#define IR_STABLE_MS         5u
+static volatile uint8 forward_ir_active = 0u;
+static uint8 forward_ir_armed = 0u;
+static uint8 forward_ir_pending = 0u;
+static uint32 forward_ir_since_ms = 0u;
+static uint8 forward_ir_left_done = 0u;
+static uint8 forward_ir_right_done = 0u;
+
 static void camera_tick(void)
 {
     camera_ms++;
 }
 
 #define PULSES_PER_GRID  2220
-#define PULSES_PER_DIAGONAL  3000
-#define PULSES_PER_45DEGREE  1420
-#define PULSES_PER_90DEGREE  2400
-#define PULSES_PER_135DEGREE  3800
-#define PULSES_PER_180DEGREE  5200
-#define PULSES_PER_225DEGREE  6470
-#define PULSES_PER_270DEGREE  7800
-#define PULSES_PER_315DEGREE  9200
+#define PULSES_PER_DIAGONAL  3200
+#define PULSES_PER_45DEGREE_LEFT 1300 //right
+#define PULSES_PER_45DEGREE_RIGHT  1200 //left
+#define PULSES_PER_90DEGREE_LEFT  2400
+#define PULSES_PER_135DEGREE_LEFT  3800
+#define PULSES_PER_180DEGREE_LEFT  5200
+#define PULSES_PER_225DEGREE_LEFT  6470
+#define PULSES_PER_270DEGREE_LEFT  7800
+#define PULSES_PER_315DEGREE_LEFT  9200
+#define PULSES_PER_90DEGREE_RIGHT  2400
+#define PULSES_PER_135DEGREE_RIGHT  3800
+#define PULSES_PER_180DEGREE_RIGHT  5200
+#define PULSES_PER_225DEGREE_RIGHT  6470
+#define PULSES_PER_270DEGREE_RIGHT  7800
+#define PULSES_PER_315DEGREE_RIGHT  9200
+
 #define MASTER_PWM 200   /* fixed PWM for the master (reference) motor */
-#define KP 0.000016        /* P-controller gain: corrects the slave motor's
+#define KP 0.3        /* P-controller gain: corrects the slave motor's
                           * PWM based on encoder-count error vs the master,
                           * so both wheels stay in sync and the robot
                           * drives straight instead of curving */
@@ -78,32 +100,64 @@ typedef struct {
 
 IfelseData if_data[30];
 
-int angle_to_pulses(int angle)
+int angle_to_pulses_rt(int angle)
 {
     angle = abs(angle);
 
     switch (angle)
     {
         case 45:
-            return PULSES_PER_45DEGREE;
+            return PULSES_PER_45DEGREE_RIGHT;
 
         case 90:
-            return PULSES_PER_90DEGREE;
+            return PULSES_PER_90DEGREE_RIGHT;
 
         case 135:
-            return PULSES_PER_135DEGREE;
+            return PULSES_PER_135DEGREE_RIGHT;
 
         case 180:
-            return PULSES_PER_180DEGREE;
+            return PULSES_PER_180DEGREE_RIGHT;
 
         case 225:
-            return PULSES_PER_225DEGREE;
+            return PULSES_PER_225DEGREE_RIGHT;
 
         case 270:
-            return PULSES_PER_270DEGREE;
+            return PULSES_PER_270DEGREE_RIGHT;
 
         case 315:
-            return PULSES_PER_315DEGREE;
+            return PULSES_PER_315DEGREE_RIGHT;
+
+        default:
+            return 0;
+    }
+}
+
+int angle_to_pulses_lt(int angle)
+{
+    angle = abs(angle);
+
+    switch (angle)
+    {
+        case 45:
+            return PULSES_PER_45DEGREE_LEFT;
+
+        case 90:
+            return PULSES_PER_90DEGREE_LEFT;
+
+        case 135:
+            return PULSES_PER_135DEGREE_LEFT;
+
+        case 180:
+            return PULSES_PER_180DEGREE_LEFT;
+
+        case 225:
+            return PULSES_PER_225DEGREE_LEFT;
+
+        case 270:
+            return PULSES_PER_270DEGREE_LEFT;
+
+        case 315:
+            return PULSES_PER_315DEGREE_LEFT;
 
         default:
             return 0;
@@ -167,11 +221,11 @@ static void play_vowel_sound(char letter)
 {
     switch (letter)
     {
-        case 'A': df_play_track(DF_TRACK_A); break;
-        case 'E': df_play_track(DF_TRACK_E); break;
-        case 'I': df_play_track(DF_TRACK_I); break;
-        case 'O': df_play_track(DF_TRACK_O); break;
-        case 'U': df_play_track(DF_TRACK_U); break;
+        case 'A': df_play_track(DF_TRACK_A); CyDelay(100); break;
+        case 'E': df_play_track(DF_TRACK_E); CyDelay(100); break;
+        case 'I': df_play_track(DF_TRACK_I); CyDelay(100); break;
+        case 'O': df_play_track(DF_TRACK_O); CyDelay(100); break;
+        case 'U': df_play_track(DF_TRACK_U); CyDelay(100); break;
         default: return;
     }
 }
@@ -196,6 +250,7 @@ void uart_printf(const char *fmt, ...)
 /* stop both drive motors */
 void stop_motors(void)
 {
+    forward_ir_active = 0u;
     Motor_1_IN_1_Write(0);
     Motor_1_IN_2_Write(0);
     Motor_2_IN_3_Write(0);
@@ -267,18 +322,19 @@ int append_simple_command(TurtleCommand *queue, volatile int *count, int max_cou
 
     if (strcmp(cmd_name, "fd") == 0 || strcmp(cmd_name, "bk") == 0)
     {
-        /* Store the raw grid-step count (signed for direction). The
-         * actual pulse target depends on the heading at the moment
-         * this command is executed, so it's computed at runtime in
-         * main() instead of here. */
+        /* Store the raw grid-step count (signed for direction).
+         * Forward steps end on the IR line; backward pulse targets
+         * are computed from the heading at execution time in main(). */
         int forward = (cmd_name[0] == 'f');
 
         queue[*count].type = forward ? 'f' : 'b';
         queue[*count].param = forward ? -value : value;
     }
+
     else if (strcmp(cmd_name, "lt") == 0 || strcmp(cmd_name, "rt") == 0)
     {
-        int pulses = angle_to_pulses(value);
+        int pulses;
+        pulses = angle_to_pulses_rt(value);
 
         if (pulses == 0)
         {
@@ -335,8 +391,8 @@ int executing_if = 0;
  * Actual physical heading in degrees (0 = whatever direction the
  * turtle starts facing, increases clockwise). Updated at runtime,
  * only when an l/r command finishes executing - not when it's
- * parsed/queued. This is what fd/bk look at (at the moment they
- * execute) to decide PULSES_PER_GRID vs PULSES_PER_DIAGONAL, so it
+ * parsed/queued. This is what bk looks at (at the moment it
+ * executes) to decide PULSES_PER_GRID vs PULSES_PER_DIAGONAL, so it
  * stays correct even inside a while-loop body that turns by
  * different amounts (45/90/135/...) on every pass.
  */
@@ -594,6 +650,65 @@ void advance_command_index(int heading_delta_deg)
     request_reset_start = 1;
 }
 
+/* Ignore the starting line until both sensors have seen white for 5 ms.
+ * Then each sensor immediately stops its own motor on the first black reading.
+ * Latch each arrival so a stopped motor stays stopped until the next step.
+ */
+static void check_forward_ir(void)
+{
+    uint8 interrupt_state = CyEnterCriticalSection();
+
+    if (forward_ir_active)
+    {
+        uint8 left_black = (LEFT_Read() == IR_LEFT_BLACK_LEVEL);
+        uint8 right_black = (RIGHT_Read() == IR_RIGHT_BLACK_LEVEL);
+        uint32 now = camera_ms;
+
+        if (!forward_ir_armed)
+        {
+            if (left_black || right_black)
+            {
+                forward_ir_pending = 0u;
+            }
+            else if (!forward_ir_pending)
+            {
+                forward_ir_pending = 1u;
+                forward_ir_since_ms = now;
+            }
+            else if ((uint32)(now - forward_ir_since_ms) >= IR_STABLE_MS)
+            {
+                forward_ir_pending = 0u;
+                forward_ir_armed = 1u;
+            }
+        }
+
+        if (forward_ir_armed)
+        {
+            if (left_black && !forward_ir_left_done)
+            {
+                forward_ir_left_done = 1u;
+                PWM_1_WriteCompare(0);
+                Motor_1_IN_1_Write(0);
+                Motor_1_IN_2_Write(0);
+            }
+            if (right_black && !forward_ir_right_done)
+            {
+                forward_ir_right_done = 1u;
+                PWM_2_WriteCompare(0);
+                Motor_2_IN_3_Write(0);
+                Motor_2_IN_4_Write(0);
+            }
+            if (forward_ir_left_done && forward_ir_right_done)
+            {
+                /* Both have arrived, even if their readings no longer match. */
+                advance_command_index(0);
+            }
+        }
+    }
+
+    CyExitCriticalSection(interrupt_state);
+}
+
 /* Proportional correction for the slave motor's PWM, clamped to 0-255 */
 int compute_slave_pwm(int error)
 {
@@ -604,12 +719,49 @@ int compute_slave_pwm(int error)
         pwm_slave = 255;
     }
 
-    if (pwm_slave < 201)
+    if (pwm_slave < 0)
     {
-        pwm_slave = 199;
+        pwm_slave = 180;
     }
 
     return pwm_slave;
+}
+
+/* Motor 1 is LEFT; motor 2 is RIGHT. Honour arrival latches on every PWM
+ * update so the slower control loop cannot restart an arrived wheel.
+ */
+static void drive_forward(int relative_c1, int relative_c2)
+{
+    uint8 interrupt_state = CyEnterCriticalSection();
+
+    if (camera_state == CAMERA_MOVING)
+    {
+        if (!forward_ir_active)
+        {
+            forward_ir_armed = 0u;
+            forward_ir_pending = 0u;
+            forward_ir_left_done = 0u;
+            forward_ir_right_done = 0u;
+            forward_ir_active = 1u;
+        }
+
+        /* While both wheels move, negative encoder counts increase in
+         * magnitude going forward. slave - master provides negative feedback.
+         * Once the right/master wheel stops, use fixed PWM for the remaining
+         * left wheel rather than correcting against a stationary reference.
+         */
+        int pwm_left = forward_ir_right_done ? MASTER_PWM
+                          : compute_slave_pwm(relative_c1 - relative_c2);
+
+        PWM_1_WriteCompare(forward_ir_left_done ? 0 : pwm_left);
+        PWM_2_WriteCompare(forward_ir_right_done ? 0 : MASTER_PWM);
+        Motor_1_IN_1_Write(0);
+        Motor_1_IN_2_Write(forward_ir_left_done ? 0 : 1);
+        Motor_2_IN_3_Write(0);
+        Motor_2_IN_4_Write(forward_ir_right_done ? 0 : 1);
+    }
+
+    CyExitCriticalSection(interrupt_state);
 }
 
 void parse_while_body(char *text)
@@ -678,6 +830,7 @@ CY_ISR(ISR_Handler_1)
 
                 waiting_for_uart = 0;
                 uart_msg_received = 0;
+                movement_steps_done = 0;
 
                 request_reset_start = 0;   /* not moving, nothing to reset a baseline for */
                 camera_state = CAMERA_READY;   /* ready to accept the next command immediately */
@@ -1416,6 +1569,7 @@ int main(void)
     for(;;)
     {  
         /* Place your application code here. */
+        check_forward_ir();
         check_camera_uart();
         if (camera_state == CAMERA_SETTLING || camera_state == CAMERA_WAIT_RESULT)
         {
@@ -1627,51 +1781,8 @@ int main(void)
             break;
             case 'f'://forward
             {
-                /* param holds a signed grid-step count; pick the pulse
-                 * count per step from the *current* heading so this
-                 * stays correct across repeated while-loop passes. */
-                int pulses_per_step = heading_is_diagonal(current_heading_deg)
-                                           ? PULSES_PER_DIAGONAL
-                                           : PULSES_PER_GRID;
-                /* One grid per segment; advance_command_index tracks the rest. */
-                int target = (current_cmd->param < 0 ? -1 : 1) * pulses_per_step;
-
-                /*
-                 * P-control (KP) keeps the two wheels' encoder counts
-                 * in sync so the robot drives straight: master motor
-                 * runs at a fixed MASTER_PWM, slave motor's PWM is
-                 * nudged up/down by KP * error.
-                 *
-                 * Forward motion drives relative_c2 (and relative_c1)
-                 * DOWN toward a negative target, so "ahead" means
-                 * "more negative". error = slave - master: if slave
-                 * has gone more negative than master (slave ahead),
-                 * error < 0 -> slave PWM decreases (slow down); if
-                 * slave lags (less negative than master), error > 0
-                 * -> slave PWM increases (speed up). Negative feedback.
-                 */
-                int error = relative_c1 - relative_c2;
-                int pwm_slave = compute_slave_pwm(error);
-
-                PWM_2_WriteCompare(MASTER_PWM);
-                PWM_1_WriteCompare(pwm_slave);
-                int c1 = QuadDec_1_GetCounter();
-                int c2 = QuadDec_1_GetCounter();
-                uart_printf("M=%d S=%d E=%d PWM_s=%d PWM_m=%d\r\n",
-                            relative_c2, relative_c1, error, pwm_slave, MASTER_PWM);
-
-                if (relative_c2 >= target)
-                {
-                    Motor_1_IN_1_Write(0);
-                    Motor_1_IN_2_Write(1);
-                    Motor_2_IN_3_Write(0);
-                    Motor_2_IN_4_Write(1);
-                }
-                else
-                {
-                    uart_printf("fd 1");
-                    advance_command_index(0);
-                }
+                /* Avoid blocking debug prints while polling for each arrival. */
+                drive_forward(relative_c1, relative_c2);
             }
             break;
             case 'l'://turn left
