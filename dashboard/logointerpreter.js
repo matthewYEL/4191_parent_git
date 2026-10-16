@@ -62,115 +62,79 @@ function extractBlock(tokens, startIndex) {
 
 // Main recursive execution parser
 export async function parseAndExecuteLOGO(programText, stepCallback) {
-  const VALID_KEYWORDS = [
-    'make', 'while', 'repeat', 'ifelse', 
-    'fd', 'bk', 
-    'lt', 'rt', 
-    '[', ']', 'vowel'
-  ];
+    Object.keys(variables).forEach(k => delete variables[k]);
 
-  const declaredVars = new Set();
+    const openBrackets = (programText.match(/\[/g) || []).length; 
+    const closeBrackets = (programText.match(/\]/g) || []).length;
+    if (openBrackets !== closeBrackets) {
+        throw new Error(`Syntax Error: Unmatched brackets ([${openBrackets}] vs ]${closeBrackets}]).`);
+    }
 
-  for (let i = 0; i < tokens.length; i++) {
-  const token = tokens[i];
-  const cmd = token.toLowerCase();
-
-  // 1. If previous token was 'make', register this token as a valid variable name
-  if (i > 0 && tokens[i - 1].toLowerCase() === 'make') {
-    declaredVars.add(cmd);
-    continue; // Skip keyword check for the variable name itself
-  }
-
-  const isKeyword = VALID_KEYWORDS.includes(cmd);
-  const isNumber = !isNaN(token);
-  const isStringLiteral = token.startsWith('"');
-  const isOperator = ['==', '=', '!=', '>', '<', '>=', '<=', '+', '-', '*', '/'].includes(cmd);
-  const isDeclaredVar = declaredVars.has(cmd) || (cmd in variables);
-
-  if (!isKeyword && !isNumber && !isStringLiteral && !isOperator && !isDeclaredVar) {
-    throw new Error(`Syntax Error: Unrecognized command '${token}'.`);
-  }
-
-  // Clear scope variables for fresh execution
-  Object.keys(variables).forEach(k => delete variables[k]);
-
-  // Check for unmatched brackets before running
-  const openBrackets = (programText.match(/\[/g) || []).length; 
-  const closeBrackets = (programText.match(/\]/g) || []).length;
-  if (openBrackets !== closeBrackets) {
-    throw new Error(`Syntax Error: Unmatched brackets ([${openBrackets}] vs ]${closeBrackets}]).`);
-  }
-
-  // Normalize code string and break into tokens
-  const tokens = programText
+    const tokens = programText
     .replace(/\[/g, ' [ ') .replace(/\]/g, ' ] ')
     .trim()
     .split(/\s+/)
     .filter(t => t.length > 0);
 
-  // Validate command tokens
-  const validCmds = ['make', 'while', 'repeat', 'ifelse', 'fd', 'bk', 'lt', 'rt', '[', ']', 'vowel'];
-
-  const declaredVars = new Set();
-  for (let i = 0; i < tokens.length; i++) {
-    if (tokens[i].toLowerCase() === 'make' && i + 1 < tokens.length) {
-        declaredVars.add(tokens[i + 1].toLowerCase());
-    }
-  }
-
-  // 3. FULL PRE-PASS VALIDATION (Scans ALL tokens regardless of runtime branches)
-  for (let i = 0; i < tokens.length; i++) {
-    const token = tokens[i];
-    const cmd = token.toLowerCase();
-
-    const isKeyword = VALID_KEYWORDS.includes(cmd);
-    const isNumber = !isNaN(token);
-    const isStringLiteral = token.startsWith('"');
-    const isOperator = ['==', '=', '!=', '>', '<', '>=', '<='].includes(cmd);
-    const isDeclaredVar = declaredVars.has(cmd);
-
-    // Check if it's a variable name preceded by 'make' or defined during run
-    const isMakeVar = i > 0 && tokens[i - 1].toLowerCase() === 'make';
-
-    if (!isKeyword && !isNumber && !isStringLiteral && !isOperator && !isMakeVar) {
-      // Throw syntax error immediately before running anything!
-      throw new Error(`Syntax Error: Unrecognized command '${token}'.`);
-    }
-  }
-
-  async function runTokens(tokenList) {
-    let ptr = 0;
     const VALID_KEYWORDS = [
         'make', 'while', 'repeat', 'ifelse', 
-        'fd', 'bk', 'backward', 
+        'fd', 'bk', 
         'lt', 'rt', 
         '[', ']', 'vowel'
     ];
 
-    while (ptr < tokenList.length) {
+    // Pre-register all variable names declared via 'make'
+    const declaredVars = new Set();
+    for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i].toLowerCase() === 'make' && i + 1 < tokens.length) {
+            declaredVars.add(tokens[i + 1].toLowerCase());
+        }
+    }
+
+    //FULL PRE-PASS VALIDATION (Scans ALL tokens regardless of runtime branches)
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        const cmd = token.toLowerCase();
+
+        const isKeyword = VALID_KEYWORDS.includes(cmd);
+        const isNumber = !isNaN(Number(token));
+        const isStringLiteral = token.startsWith('"') || token.endsWith('"');
+        const isOperator = ['==', '=', '!=', '>', '<', '>=', '<=', '+', '-', '*', '/'].includes(cmd);
+        const isDeclaredVar = declaredVars.has(cmd);
+        const isMakeVar = i > 0 && tokens[i - 1].toLowerCase() === 'make';
+
+        if (!isKeyword && !isNumber && !isStringLiteral && !isOperator && !isDeclaredVar && !isMakeVar) {
+        throw new Error(`Syntax Error: Unrecognized command '${token}'.`);
+        }
+    }
+    async function runTokens(tokenList) {
+        let ptr = 0;
+
+        while (ptr < tokenList.length) {
         const token = tokenList[ptr];
         const cmd = token.toLowerCase();
 
-        // 1. Check if token is an unrecognized command/word
+        // Runtime command validation
         const isKeyword = VALID_KEYWORDS.includes(cmd);
-        const isNumber = !isNaN(token);
-        const isStringLiteral = token.startsWith('"');
-        const isOperator = ['==', '=', '!=', '>', '<', '>=', '<='].includes(cmd);
-        const isVariable = cmd in variables;
+        const isNumber = !isNaN(Number(token));
+        const isStringLiteral = token.startsWith('"') || token.endsWith('"');
+        const isOperator = ['==', '=', '!=', '>', '<', '>=', '<=', '+', '-', '*', '/'].includes(cmd);
+        const isVariable = cmd in variables || declaredVars.has(cmd);
 
         if (!isKeyword && !isNumber && !isStringLiteral && !isOperator && !isVariable) {
             throw new Error(`Syntax Error: Unrecognized command '${token}'.`);
         }
 
-        // 1. MAKE VARNAME EXPR
+        // 6.1 MAKE VARNAME EXPR
         if (cmd === 'make') {
             const varName = tokenList[ptr + 1];
+            if (!varName) throw new Error("Syntax Error: 'make' requires a variable name.");
             ptr += 2;
-            let exprTokens = [];
             
+            let exprTokens = [];
             while (
             ptr < tokenList.length && 
-            !['make','while','repeat','ifelse','fd','bk','lt','rt','[', 'vowel'].includes(tokenList[ptr].toLowerCase())
+            !VALID_KEYWORDS.includes(tokenList[ptr].toLowerCase())
             ) {
             exprTokens.push(tokenList[ptr]);
             ptr++;
@@ -181,22 +145,22 @@ export async function parseAndExecuteLOGO(programText, stepCallback) {
             continue;
         }
 
-        // 2. REPEAT EXPR [ STATEMENTS ]
-        if (cmd === 'repeat') {
-            const countExpr = tokenList[ptr + 1];
-            const times = evaluateExpr(countExpr);
-            ptr += 2;
+      // 6.2 REPEAT EXPR [ STATEMENTS ]
+      if (cmd === 'repeat') {
+        const countExpr = tokenList[ptr + 1];
+        const times = evaluateExpr(countExpr);
+        ptr += 2;
 
-            const { blockTokens, nextIndex } = extractBlock(tokenList, ptr);
-            ptr = nextIndex;
+        const { blockTokens, nextIndex } = extractBlock(tokenList, ptr);
+        ptr = nextIndex;
 
-            for (let r = 0; r < times; r++) {
-            await runTokens(blockTokens);
-            }
-            continue;
+        for (let r = 0; r < times; r++) {
+          await runTokens(blockTokens);
         }
+        continue;
+      }
 
-        // 3. WHILE EXPR [ STATEMENTS ]
+        // 6.3 WHILE EXPR [ STATEMENTS ]
         if (cmd === 'while') {
             ptr++;
             let exprTokens = [];
@@ -209,15 +173,16 @@ export async function parseAndExecuteLOGO(programText, stepCallback) {
             const { blockTokens, nextIndex } = extractBlock(tokenList, ptr);
             ptr = nextIndex;
 
-            let maxGuard = 2000; // Protect against infinite loops
+            let maxGuard = 2000;
             while (evaluateExpr(exprStr) && maxGuard > 0) {
-            await runTokens(blockTokens);
+            const hitBorder = await runTokens(blockTokens);
+            if (hitBorder) break;
             maxGuard--;
             }
             continue;
         }
 
-        // 4. IFELSE EXPR [ TRUE_BLOCK ] [ FALSE_BLOCK ]
+        // 6.4 IFELSE EXPR [ TRUE_BLOCK ] [ FALSE_BLOCK ]
         if (cmd === 'ifelse') {
             ptr++;
             let exprTokens = [];
@@ -241,16 +206,18 @@ export async function parseAndExecuteLOGO(programText, stepCallback) {
             continue;
         }
 
-        // 5. TURTLE MOTIONS (FD, BK, LT, RT)
+        // 6.5 TURTLE MOTIONS
         if (['fd', 'bk', 'lt', 'rt'].includes(cmd)) {
             const val = evaluateExpr(tokenList[ptr + 1] || '1');
-            await stepCallback(cmd, val);
+            const stepResult = await stepCallback(cmd, val);
             ptr += 2;
+            if (stepResult === true) return true; // Stop execution early if robot crashes into border
             continue;
         }
 
         ptr++;
         }
     }
-  await runTokens(tokens);
+
+    await runTokens(tokens);
 }

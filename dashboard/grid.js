@@ -149,10 +149,10 @@ export function checkMissingRequiredCommands(commandString) {
     { id: 'include-while', label: 'while', keywords: ['while'] },
     { id: 'include-ifelse', label: 'ifelse', keywords: ['ifelse'] },
     { id: 'include-repeat', label: 'repeat', keywords: ['repeat'] },
-    { id: 'include-forward', label: 'forward (fd)', keywords: ['fd', 'forward'] },
-    { id: 'include-backward', label: 'backward (bk)', keywords: ['bk', 'backward'] },
-    { id: 'include-left', label: 'left turn (lt)', keywords: ['lt', 'left'] },
-    { id: 'include-right', label: 'right turn (rt)', keywords: ['rt', 'right'] }
+    { id: 'include-forward', label: 'forward (fd)', keywords: ['fd'] },
+    { id: 'include-backward', label: 'backward (bk)', keywords: ['bk'] },
+    { id: 'include-left', label: 'left turn (lt)', keywords: ['lt'] },
+    { id: 'include-right', label: 'right turn (rt)', keywords: ['rt'] }
   ];
 
   requiredChecks.forEach(item => {
@@ -240,15 +240,15 @@ export async function executeLogoCommands(commandString) {
       await parseAndExecuteLOGO(commandString, async (cmd, val) => {
         let hitBorder = false;
 
-        if (cmd === 'fd' || cmd === 'forward') {
+        if (cmd === 'fd') {
           hitBorder = await moveRobotForward(val, runTracker);
-        } else if (cmd === 'bk' || cmd === 'backward') {
+        } else if (cmd === 'bk') {
           hitBorder = await moveRobotForward(-val, runTracker);
-        } else if (cmd === 'rt' || cmd === 'right') {
+        } else if (cmd === 'rt') {
           robotState.heading = (robotState.heading + val + 360) % 360;
           highlightCurrentRobotCell(robotState.colIdx, robotState.rowIdx);
           await new Promise(r => setTimeout(r, 150));
-        } else if (cmd === 'lt' || cmd === 'left') {
+        } else if (cmd === 'lt') {
           robotState.heading = (robotState.heading - val + 360) % 360;
           highlightCurrentRobotCell(robotState.colIdx, robotState.rowIdx);
           await new Promise(r => setTimeout(r, 150));
@@ -267,6 +267,9 @@ export async function executeLogoCommands(commandString) {
   const finalKey = `${COLS[robotState.colIdx]}${robotState.rowIdx + 1}`;
   if (destCoord && finalKey === destCoord) {
     runTracker.reachedDestination = true;
+  } else if (!destCoord) {
+    // If no destination exists on grid, mark as reached automatically
+    runTracker.reachedDestination = true; 
   }
 
   // Evaluate final score & pop modal
@@ -698,7 +701,7 @@ export function evaluateMissionRun(simulationResult) {
     return {
       passed: false,
       score: 0,
-      breakdown: { itemWeight: "0.0", clearedObs: `${Math.max(0, totalObstacles - hitObsCount)}/${totalObstacles}`, vowels: `${visitedVowelsCount}/${totalVowels}` },
+      breakdown: { itemWeight: "0.0", clearedObs: "0/0", vowels: "0/0" },
       reason: "FAILED: Did not end on Destination (🏁).",
       obstaclesAvoided: `${hitObsCount === 0 ? 1 : 0}/1`,
       checkpointsVisited: `${visitedVowelsCount}/${totalVowels}`
@@ -731,18 +734,18 @@ export function evaluateMissionRun(simulationResult) {
   // 6. Aggregate Final Score
   const rawScore = obstacleScore + vowelScore;
   const finalScore = Math.min(100, Math.round(rawScore));
-  const passed = simulationResult.reachedDestination;
+  const passed = destCoord ? Boolean(simulationResult.reachedDestination) : true;
 
   return {
-    passed: passed,
-    score: passed ? finalScore : 0,
-    breakdown: {
-      itemWeight: itemWeight.toFixed(1),
-      clearedObs: `${clearedObstacles}/${totalObstacles}`,
-      vowels: `${visitedVowelsCount}/${totalVowels}`
-    },
-    reason: passed ? "Mission Completed!" : "FAILED: Did not end on Destination (🏁)."
-  };
+  passed: passed,
+  score: passed ? finalScore : 0,
+  breakdown: {
+    itemWeight: itemWeight.toFixed(1),
+    clearedObs: `${clearedObstacles}/${totalObstacles}`,
+    vowels: `${visitedVowelsCount}/${totalVowels}`
+  },
+  reason: passed ? "Mission Completed!" : "FAILED: Did not end on Destination (🏁)."
+};
 }
 
 // UI Popup & Banner Controllers
