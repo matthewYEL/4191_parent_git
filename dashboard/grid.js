@@ -1,5 +1,6 @@
 // grid.js
 import { sendData } from './bluetooth.js';
+import { parseAndExecuteLOGO, setVariable } from './logointerpreter.js';
 
 const COLS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T'];
 const ROWS = 20;
@@ -138,9 +139,70 @@ export function syncRobotToStart() {
   highlightCurrentRobotCell(robotState.colIdx, robotState.rowIdx);
 }
 
+//Check if required commands are missing from user code
+export function checkMissingRequiredCommands(commandString) {
+  const missing = [];
+  const lowerCode = commandString.toLowerCase();
+
+  // Mapping checkbox IDs/labels to command keywords
+  const requiredChecks = [
+    { id: 'include-while', label: 'while', keywords: ['while'] },
+    { id: 'include-ifelse', label: 'ifelse', keywords: ['ifelse'] },
+    { id: 'include-repeat', label: 'repeat', keywords: ['repeat'] },
+    { id: 'include-forward', label: 'forward (fd)', keywords: ['fd', 'forward'] },
+    { id: 'include-backward', label: 'backward (bk)', keywords: ['bk', 'backward'] },
+    { id: 'include-left', label: 'left turn (lt)', keywords: ['lt', 'left'] },
+    { id: 'include-right', label: 'right turn (rt)', keywords: ['rt', 'right'] }
+  ];
+
+  requiredChecks.forEach(item => {
+    const checkbox = document.getElementById(item.id);
+    if (checkbox && checkbox.checked) {
+      // Check if code contains at least one of the matching command keywords
+      const hasCmd = item.keywords.some(kw => new RegExp(`\\b${kw}\\b`, 'i').test(lowerCode));
+      if (!hasCmd) {
+        missing.push(item.label);
+      }
+    }
+  });
+
+  return missing;
+}
+
+// Helper to validate code against "Must Exclude" checkboxes
+function checkExcludedCommands(codeText) {
+  const excludedBoxes = document.querySelectorAll('.game-checkboxes input.cross-checkbox:checked');
+  const upperCode = codeText.toUpperCase();
+  const violations = [];
+
+  excludedBoxes.forEach(box => {
+    const cmd = box.dataset.command;
+    let pattern;
+
+    if (cmd === 'left') pattern = /\b(LT|LEFT)\b/;
+    else if (cmd === 'right') pattern = /\b(RT|RIGHT)\b/;
+    else if (cmd === 'forward') pattern = /\b(FD|FORWARD)\b/;
+    else if (cmd === 'backward') pattern = /\b(BK|BACKWARD)\b/;
+    else pattern = new RegExp(`\\b${cmd.toUpperCase()}\\b`);
+
+    if (pattern.test(upperCode)) {
+      violations.push(cmd);
+    }
+  });
+
+  return violations;
+}
+
 export async function executeLogoCommands(commandString) {
   if (!startCoord) {
     alert("Please place a Start point (🚀) on the grid first!");
+    return;
+  }
+
+  //Validate Must Exclude constraints
+  const violations = checkExcludedCommands(commandString);
+  if (violations.length > 0) {
+    alert(`❌ Code Execution Blocked!\nYour code contains excluded command(s): ${violations.join(', ')}`);
     return;
   }
 
@@ -154,38 +216,54 @@ export async function executeLogoCommands(commandString) {
     reachedDestination: false,
     hitObstacles: new Set(),
     visitedVowels: new Set(),
-    completedVowelActions: new Set()
+    hasSyntaxError: false,
+    syntaxErrorMsg: "",
+    hasConstraintViolation: false,
+    constraintMsg: ""
   };
 
-  const tokens = commandString.trim().toUpperCase().split(/\s+/);
-  let i = 0;
+  // CHECK MUST INCLUDE / MUST EXCLUDE CONSTRAINTS
+  const missingIncludes = checkMissingRequiredCommands(commandString); 
+  const forbiddenExcludes = checkExcludedCommands(commandString); 
 
-  while (i < tokens.length) {
-    const cmd = tokens[i];
-    const val = parseInt(tokens[i + 1], 10) || 0;
+  if (missingIncludes.length > 0) {
+    runTracker.hasConstraintViolation = true;
+    runTracker.constraintMsg = `FAILED: Code missing required command(s): ${missingIncludes.join(', ')}.`;
+  } else if (forbiddenExcludes.length > 0) {
+    runTracker.hasConstraintViolation = true;
+    runTracker.constraintMsg = `FAILED: Code uses forbidden command(s): ${forbiddenExcludes.join(', ')}.`;
+  }
+  
+  // RUN SIMULATION WITH SYNTAX ERROR CATCHING
+  if (!runTracker.hasConstraintViolation) {
+    try {
+      await parseAndExecuteLOGO(commandString, async (cmd, val) => {
+        let hitBorder = false;
 
-    if (cmd === 'FD' || cmd === 'FORWARD') {
-      const hitBorder = await moveRobotForward(val, runTracker);
-      if (hitBorder) break; // Stop loop on border crash
-      i += 2;
-    } else if (cmd === 'BK' || cmd === 'BACKWARD') {
-      const hitBorder = await moveRobotForward(-val, runTracker);
-      if (hitBorder) break;
-      i += 2;
-    } else if (cmd === 'RT' || cmd === 'RIGHT') {
-      robotState.heading = (robotState.heading + val) % 360;
-      highlightCurrentRobotCell(robotState.colIdx, robotState.rowIdx);
-      i += 2;
-    } else if (cmd === 'LT' || cmd === 'LEFT') {
-      robotState.heading = (robotState.heading - val + 360) % 360;
-      highlightCurrentRobotCell(robotState.colIdx, robotState.rowIdx);
-      i += 2;
-    } else {
-      i++;
+        if (cmd === 'fd' || cmd === 'forward') {
+          hitBorder = await moveRobotForward(val, runTracker);
+        } else if (cmd === 'bk' || cmd === 'backward') {
+          hitBorder = await moveRobotForward(-val, runTracker);
+        } else if (cmd === 'rt' || cmd === 'right') {
+          robotState.heading = (robotState.heading + val + 360) % 360;
+          highlightCurrentRobotCell(robotState.colIdx, robotState.rowIdx);
+          await new Promise(r => setTimeout(r, 150));
+        } else if (cmd === 'lt' || cmd === 'left') {
+          robotState.heading = (robotState.heading - val + 360) % 360;
+          highlightCurrentRobotCell(robotState.colIdx, robotState.rowIdx);
+          await new Promise(r => setTimeout(r, 150));
+        }
+
+        return hitBorder;
+      });
+    } catch (err) {
+      console.error("LOGO Syntax/Runtime Error:", err);
+      runTracker.hasSyntaxError = true;
+      runTracker.syntaxErrorMsg = `FAILED: Code Syntax Error (${err.message}).`;
     }
   }
 
-  // Check if final step stopped on Destination
+  //CHECK DESTINATION
   const finalKey = `${COLS[robotState.colIdx]}${robotState.rowIdx + 1}`;
   if (destCoord && finalKey === destCoord) {
     runTracker.reachedDestination = true;
@@ -195,6 +273,10 @@ export async function executeLogoCommands(commandString) {
   lastEvaluationResult = evaluateMissionRun(runTracker);
   showGradeModal(lastEvaluationResult);
   updateGradeBanner(lastEvaluationResult);
+
+  console.log("🏁 Final Cell Key:", `${COLS[robotState.colIdx]}${robotState.rowIdx + 1}`);
+  console.log("🎯 Required Dest:", destCoord);
+  console.log("✅ Reached Dest?:", runTracker.reachedDestination);
 }
 
 async function moveRobotForward(steps, runTracker) {
@@ -235,10 +317,19 @@ async function moveRobotForward(steps, runTracker) {
 
     // 4. Track cell interactions
     const currentKey = `${COLS[robotState.colIdx]}${robotState.rowIdx + 1}`;
-    if (boardState[currentKey] && runTracker) {
+    
+    if (boardState[currentKey]) {
       const cellType = boardState[currentKey].type;
-      if (cellType === 'obstacle') runTracker.hitObstacles.add(currentKey);
-      if (['A','E','I','O','U'].includes(cellType)) runTracker.visitedVowels.add(cellType);
+      if (cellType === 'obstacle' && runTracker) runTracker.hitObstacles.add(currentKey);
+      
+      if (['A','E','I','O','U'].includes(cellType)) {
+        if (runTracker) runTracker.visitedVowels.add(cellType);
+        setVariable('vowel', cellType); // <-- ADD THIS LINE: Sets variable to 'A', 'E', 'I', 'O', or 'U'
+      } else {
+        setVariable('vowel', "NONE"); // <-- ADD THIS LINE: Resets to 0 for non-vowel items
+      }
+    } else {
+      setVariable('vowel', "NONE"); // <-- ADD THIS LINE: Resets to 0 for empty grid cells
     }
 
     highlightCurrentRobotCell(robotState.colIdx, robotState.rowIdx);
@@ -557,42 +648,70 @@ function createLabelCell(parent, text) {
 }
 
 export function evaluateMissionRun(simulationResult) {
-  // 1. Immediate Fail: Boundary Breach
-  if (simulationResult.hitBorder) {
-    return {
-      passed: false,
-      score: 0,
-      breakdown: {
-        itemWeight: "0.0",
-        clearedObs: "0/0",
-        vowels: "0/0"
-      },
-      reason: "CRASH: Robot hit the grid border and stopped!"
-    };
-  }
+  // Safely extract Set sizes with fallbacks to avoid TypeErrors
+  const hitObsCount = simulationResult?.hitObstacles?.size || 0;
+  const visitedVowelsCount = simulationResult?.visitedVowels?.size || 0;
 
-  // 2. Count Total Graded Grid Elements
+  // Calculate grid counts dynamically
   const totalObstacles = Object.keys(boardState).filter(k => boardState[k].type === 'obstacle').length;
   const totalVowels = Object.keys(boardState).filter(k => ['A','E','I','O','U'].includes(boardState[k].type)).length;
   const totalItems = totalObstacles + totalVowels;
 
-  // Handle Sets properly (.size instead of .length)
-  const hitObsCount = simulationResult.hitObstacles.size || 0;
-  const visitedVowelsCount = simulationResult.visitedVowels.size || 0;
-  const completedActionsCount = simulationResult.completedVowelActions.size || 0;
+  // OVERRIDE 1: Constraint Violation (Must Include/Exclude)
+  if (simulationResult.hasConstraintViolation) {
+    return {
+      passed: false,
+      score: 0,
+      breakdown: { itemWeight: "0.0", clearedObs: `0/${totalObstacles}`, vowels: `0/${totalVowels}` },
+      reason: simulationResult.constraintMsg || "FAILED: Rule constraint violation.",
+      obstaclesAvoided: `${hitObsCount === 0 ? 1 : 0}/1`,
+      checkpointsVisited: `${visitedVowelsCount}/${totalVowels}`
+    };
+  }
 
-  // Edge case: If teacher places NO obstacles and NO vowels
+  // OVERRIDE 2: Syntax Error
+  if (simulationResult.hasSyntaxError) {
+    return {
+      passed: false,
+      score: 0,
+      breakdown: { itemWeight: "0.0", clearedObs: "0/0", vowels: "0/0" },
+      reason: simulationResult.syntaxErrorMsg || "FAILED: Syntax Error.",
+      obstaclesAvoided: "0/1",
+      checkpointsVisited: `0/${totalVowels}`
+    };
+  }
+
+  // OVERRIDE 3: Border Crash
+  if (simulationResult.hitBorder) {
+    return {
+      passed: false,
+      score: 0,
+      breakdown: { itemWeight: "0.0", clearedObs: "0/0", vowels: "0/0" },
+      reason: "CRASH: Robot hit the grid border and stopped!",
+      obstaclesAvoided: "0/1",
+      checkpointsVisited: `${visitedVowelsCount}/${totalVowels}`
+    };
+  }
+
+  // OVERRIDE 4: Did not reach destination
+  if (destCoord && !simulationResult.reachedDestination) {
+    return {
+      passed: false,
+      score: 0,
+      breakdown: { itemWeight: "0.0", clearedObs: `${Math.max(0, totalObstacles - hitObsCount)}/${totalObstacles}`, vowels: `${visitedVowelsCount}/${totalVowels}` },
+      reason: "FAILED: Did not end on Destination (🏁).",
+      obstaclesAvoided: `${hitObsCount === 0 ? 1 : 0}/1`,
+      checkpointsVisited: `${visitedVowelsCount}/${totalVowels}`
+    };
+  }
+
   if (totalItems === 0) {
-    const passed = simulationResult.reachedDestination;
+    const passed = Boolean(simulationResult.reachedDestination);
     return {
       passed: passed,
       score: passed ? 100 : 0,
-      breakdown: {
-        itemWeight: "0.0",
-        clearedObs: "N/A",
-        vowels: "N/A"
-      },
-      reason: passed ? "Mission Successful!" : "Failed to reach destination."
+      breakdown: { itemWeight: "0.0", clearedObs: "N/A", vowels: "N/A" },
+      reason: passed ? "Mission Successful!" : "FAILED: Did not end on Destination (🏁)."
     };
   }
 
@@ -607,9 +726,7 @@ export function evaluateMissionRun(simulationResult) {
   const touchWeight = itemWeight * 0.5;
   const actionWeight = itemWeight * 0.5;
 
-  const vowelTouchScore = visitedVowelsCount * touchWeight;
-  const vowelActionScore = completedActionsCount * actionWeight;
-  const vowelScore = vowelTouchScore + vowelActionScore;
+  const vowelScore = totalVowels > 0 ? (visitedVowelsCount / totalVowels) * itemWeight : itemWeight;
 
   // 6. Aggregate Final Score
   const rawScore = obstacleScore + vowelScore;

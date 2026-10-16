@@ -58,7 +58,7 @@ export const TEMPLATES = [
     obstacles: ['D14', 'G17'],
     include: ['repeat'], exclude: ['while'],
     solution: 'repeat 6 [ fd 1 rt 90 fd 1 lt 90 ]',
-    robotOnly: true
+    robotOnly: false
   },
   {
     id: 'find-vowel', level: 'Advanced', name: 'Find the Vowel (while)',
@@ -66,8 +66,8 @@ export const TEMPLATES = [
     start: 'J18', dir: 0,
     vowels: { O: 'J8' },
     include: ['while'],
-    solution: 'make "vowel "NONE\nwhile :vowel = "NONE [ fd 1 ]',
-    robotOnly: true
+    solution: 'make vowel "NONE"\nwhile vowel == "NONE" [ fd 1 ]',
+    robotOnly: false
   },
   {
     id: 'fork-road', level: 'Advanced', name: 'Fork in the Road (ifelse)',
@@ -75,8 +75,8 @@ export const TEMPLATES = [
     start: 'J18', dir: 0, dest: 'F14',
     obstacles: ['J13'], vowels: { A: 'J14' },
     include: ['ifelse'],
-    solution: 'make "vowel "NONE\nfd 4 ifelse :vowel = "a [ lt 90 fd 4 ] [ rt 90 fd 4 ]',
-    robotOnly: true
+    solution: 'make vowel "NONE"\nfd 4 \nifelse vowel == "A" [ lt 90 fd 4 ] [ rt 90 fd 4 ]',
+    robotOnly: false
   },
   {
     id: 'seek-decide', level: 'Advanced', name: 'Seek and Decide (while + ifelse)',
@@ -84,7 +84,7 @@ export const TEMPLATES = [
     start: 'J18', dir: 0, dest: 'M10',
     vowels: { E: 'J10' },
     include: ['while', 'ifelse'],
-    solution: 'make "vowel "NONE\nwhile :vowel = "NONE [ fd 1 ]\nifelse :vowel = "e [ rt 90 fd 3 ] [ lt 90 fd 3 ]',
-    robotOnly: true
+    solution: 'make vowel "NONE"\nwhile vowel == "NONE" [ fd 1 ]\nifelse vowel == "E" [ rt 90 fd 3 ] [ lt 90 fd 3 ]',
+    robotOnly: false
   }
 ];
