@@ -156,7 +156,6 @@ select {
   text-align: left;
 }
 
-<<<<<<< HEAD
 /* Template Picker */
 .template-panel {
   text-align: left;
@@ -176,8 +175,6 @@ select {
   margin: 6px 0;
 }
 
-=======
->>>>>>> ebd7c0c95b7bf4099ecf8a590d71651ce2db3d74
 /* Item Selection Dropdown */
 .item-select {
   padding: 8px;
