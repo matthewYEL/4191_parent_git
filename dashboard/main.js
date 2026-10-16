@@ -2,8 +2,12 @@
 
 import { connectToRobot, registerDataHandler } from './bluetooth.js';
 import { initGrid, executeLogoCommands, clearTrail } from './grid.js';
+<<<<<<< HEAD
 import { openLastGradeModal, loadTemplate } from './grid.js';
 import { TEMPLATES } from './templates.js';
+=======
+import { openLastGradeModal } from './grid.js';
+>>>>>>> ebd7c0c95b7bf4099ecf8a590d71651ce2db3d74
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log("🚀 [MAIN] Starting single-page dashboard...");
@@ -132,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (resetTrailBtn) {
     resetTrailBtn.addEventListener('click', clearTrail);
   }
+<<<<<<< HEAD
 
   // 8. Template Picker
   const templateSelect = document.getElementById('templateSelect');
@@ -170,6 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
+=======
+>>>>>>> ebd7c0c95b7bf4099ecf8a590d71651ce2db3d74
 });
 
 // Attach mutual exclusion logic for Include / Exclude checkboxes
